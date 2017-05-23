@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "Space2D.h"
+#include "CollisionDetection.h"
 
 void main(int argc, const char* argv[])
 {
@@ -52,16 +53,22 @@ void main(int argc, const char* argv[])
 	settings.antialiasingLevel = 2;
 
 	sf::RenderWindow window(vm, "Space Simulation", sf::Style::Titlebar | sf::Style::Close | sf::Style::Default, settings);
-	//window.setFramerateLimit(60);
+	window.setFramerateLimit(60);
 
-	Space2D spaaace;
-	spaaace.physxTick = .016f;
+	//Space2D spaaace;
+	//spaaace.physxTick = .016f;
 
-	spaaace.setRenderWindow(&window);
-	spaaace.setWorldDimensions(300, 1000);
-	/*spaaace.setNumberOfThreads(threads);
-	spaaace.setMutlithreadingMode(mode);
-	spaaace.setOpenCLPlatformAndDevice(platformId, deviceId);*/
-	spaaace.setDebugMode(debug);
-	spaaace.Run();
+	//spaaace.setRenderWindow(&window);
+	//spaaace.setWorldDimensions(300, 1000);
+	///*spaaace.setNumberOfThreads(threads);
+	//spaaace.setMutlithreadingMode(mode);
+	//spaaace.setOpenCLPlatformAndDevice(platformId, deviceId);*/
+	//spaaace.setDebugMode(debug);
+	//spaaace.Run();
+
+	CollisionDetection cd;
+	cd.setDebugMode(true);
+	cd.physxTick = 0.016f;
+	cd.setRenderWindow(&window);
+	cd.StartDemo(300, sf::Vector2i(500, 500));
 }
