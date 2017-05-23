@@ -56,6 +56,17 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 	CollisionTriangle mouseTriangle;
 	mouseTriangle.setFillColor(sf::Color(237, 179, 0));
+	sf::CircleShape mouseSBV;
+	mouseSBV.setFillColor(sf::Color::Transparent);
+	mouseSBV.setOutlineColor(sf::Color(255, 121, 57));
+	mouseSBV.setOutlineThickness(.1f);
+	mouseSBV.setRadius(mouseTriangle.getRadius());
+	mouseSBV.setOrigin(mouseTriangle.getRadius(), mouseTriangle.getRadius());
+
+	sf::CircleShape colliderSphere;
+	colliderSphere.setFillColor(sf::Color::Transparent);
+	colliderSphere.setOutlineColor(sf::Color(255, 121, 57));
+	colliderSphere.setOutlineThickness(1.0f);
 	//*** ss
 
 	unsigned int fps = 0, fpsCount = 0;
@@ -167,9 +178,15 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			m_view.move(sf::Vector2f(1.f, 0.f)*50.0f*dt);
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+		{
 			mouseTriangle.scale(1.1f, 1.1f);
+			mouseSBV.scale(1.1f, 1.1f);
+		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+		{
 			mouseTriangle.scale(0.9f, 0.9f);
+			mouseSBV.scale(0.9f, 0.9f);
+		}
 
 		//*** controls
 
@@ -195,6 +212,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		//}
 
 		mouseTriangle.setPosition(mousePos_mapped);
+		mouseSBV.setPosition(mousePos_mapped);
 
 		++fpsCount;
 
@@ -214,11 +232,22 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		m_window->setView(m_view);
 
 		m_window->draw(mouseTriangle);
+		m_window->draw(mouseSBV);
 
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
-			bool hit = DoCollide(m_triangles[i], mouseTriangle);
+			bool hit = CollideSBV(m_triangles[i], mouseTriangle);
 			m_triangles[i].isHit(hit);
+
+			if (hit)
+			{
+				float radius = m_triangles[i].getRadius();
+				colliderSphere.setRadius(radius);
+				colliderSphere.setOrigin(radius, radius);
+				colliderSphere.setPosition(m_triangles[i].getPosition());
+				m_window->draw(colliderSphere);
+			}
+
 			m_window->draw(m_triangles[i]);
 		}
 
@@ -252,7 +281,7 @@ void CollisionDetection::setRenderWindow(sf::RenderWindow * wndw)
 	m_window = wndw;
 }
 
-bool CollisionDetection::DoCollide(CollisionTriangle first, CollisionTriangle second)
+bool CollisionDetection::CollideSBV(CollisionTriangle first, CollisionTriangle second)
 {
 	bool result;
 

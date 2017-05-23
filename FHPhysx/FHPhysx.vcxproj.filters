@@ -44,5 +44,8 @@
     <ClInclude Include="vector2math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RNGesus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

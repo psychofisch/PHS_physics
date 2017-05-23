@@ -20,7 +20,7 @@ public:
 	//void setWorldDimensions(unsigned int size); //true = ERROR; false = successful
 	//void setWorldDimensions(unsigned int size_x, unsigned int size_y);
 
-	static bool DoCollide(CollisionTriangle first, CollisionTriangle second);
+	static bool CollideSBV(CollisionTriangle first, CollisionTriangle second);
 
 	float physxTick;
 

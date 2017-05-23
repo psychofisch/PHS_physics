@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClInclude Include="CollisionDetection.h" />
     <ClInclude Include="CollisionTriangle.h" />
+    <ClInclude Include="RNGesus.h" />
     <ClInclude Include="Space2D.h" />
     <ClInclude Include="vector2math.h" />
   </ItemGroup>
