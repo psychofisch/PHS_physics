@@ -1,8 +1,12 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 
 #include <SFML/Graphics.hpp>
+
+#include "vector2math.h"
+#include "CollisionTriangle.h"
 
 class CollisionDetection
 {
@@ -16,11 +20,14 @@ public:
 	//void setWorldDimensions(unsigned int size); //true = ERROR; false = successful
 	//void setWorldDimensions(unsigned int size_x, unsigned int size_y);
 
+	static bool DoCollide(CollisionTriangle first, CollisionTriangle second);
+
 	float physxTick;
 
 private:
 	sf::Vector2u m_dimension;
 	sf::RenderWindow* m_window;
+	sf::View m_view;
 	bool m_debug;
 };
 

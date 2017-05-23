@@ -122,12 +122,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp" />
+    <ClCompile Include="CollisionTriangle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Space2D.cpp" />
+    <ClCompile Include="vector2math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionDetection.h" />
+    <ClInclude Include="CollisionTriangle.h" />
     <ClInclude Include="Space2D.h" />
+    <ClInclude Include="vector2math.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
