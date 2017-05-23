@@ -45,7 +45,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	{
 		tmpX += tmpFactor;
 
-		if (i % 17 == 0)
+		if (i % 18 == 0)
 		{
 			tmpX = tmpFactor;
 			tmpY += tmpFactor;
@@ -169,7 +169,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 			mouseTriangle.scale(1.1f, 1.1f);
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-			mouseTriangle.setRadius(mouseTriangle.getRadius() * 0.9f);
+			mouseTriangle.scale(0.9f, 0.9f);
 
 		//*** controls
 
