@@ -21,6 +21,7 @@ public:
 	//void setWorldDimensions(unsigned int size_x, unsigned int size_y);
 
 	static bool CollideSBV(CollisionTriangle first, CollisionTriangle second);
+	static bool CollideAABB(CollisionTriangle first, CollisionTriangle second);
 
 	float physxTick;
 

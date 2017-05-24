@@ -67,6 +67,11 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	colliderSphere.setFillColor(sf::Color::Transparent);
 	colliderSphere.setOutlineColor(sf::Color(255, 121, 57));
 	colliderSphere.setOutlineThickness(1.0f);
+
+	sf::RectangleShape colliderRect;
+	colliderRect.setFillColor(sf::Color::Transparent);
+	colliderRect.setOutlineColor(sf::Color(255, 121, 57));
+	colliderRect.setOutlineThickness(1.0f);
 	//*** ss
 
 	unsigned int fps = 0, fpsCount = 0;
@@ -236,19 +241,36 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
+			m_window->draw(m_triangles[i]);
+
+			sf::Vector2f triPos = m_triangles[i].getPosition();
+
+			//SBV
 			bool hit = CollideSBV(m_triangles[i], mouseTriangle);
 			m_triangles[i].isHit(hit);
 
-			if (hit)
-			{
-				float radius = m_triangles[i].getRadius();
-				colliderSphere.setRadius(radius);
-				colliderSphere.setOrigin(radius, radius);
-				colliderSphere.setPosition(m_triangles[i].getPosition());
-				m_window->draw(colliderSphere);
-			}
+			if (hit == false)
+				continue;
 
-			m_window->draw(m_triangles[i]);
+			float radius = m_triangles[i].getRadius();
+			colliderSphere.setRadius(radius);
+			colliderSphere.setOrigin(radius, radius);
+			colliderSphere.setPosition(triPos);
+			m_window->draw(colliderSphere);
+			//*** sbv
+
+			//AABB
+			hit = CollideAABB(m_triangles[i], mouseTriangle);
+
+			if (hit == false)
+				continue;
+
+			colliderRect.setSize(sf::Vector2f(m_triangles[i].getGlobalBounds().width, m_triangles[i].getGlobalBounds().height));
+			colliderRect.setOrigin(colliderRect.getSize() * 0.5f);
+			colliderRect.setPosition(triPos);
+			m_window->draw(colliderRect);
+
+			//*** AABB
 		}
 
 		// debug text
@@ -283,15 +305,19 @@ void CollisionDetection::setRenderWindow(sf::RenderWindow * wndw)
 
 bool CollisionDetection::CollideSBV(CollisionTriangle first, CollisionTriangle second)
 {
-	bool result;
-
 	float dist = vectorMath::magnitude(first.getPosition() - second.getPosition());
 	float addedRadius = first.getRadius() * first.getScale().x + second.getRadius() * second.getScale().x;
 
 	if (dist > addedRadius)
-		result = false;
+		return false;
 	else
-		result = true;
+		return true;
+}
 
-	return result;
+bool CollisionDetection::CollideAABB(CollisionTriangle first, CollisionTriangle second)
+{
+	if (first.getGlobalBounds().intersects(second.getGlobalBounds()))
+		return true;
+	else
+		return false;
 }
