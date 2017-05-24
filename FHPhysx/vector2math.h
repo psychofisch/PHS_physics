@@ -19,6 +19,7 @@ namespace sf {
 namespace vectorMath {
 	sf::Vector2f normalize(const sf::Vector2f&);
 	float magnitude(const sf::Vector2f&);
+	float max(const sf::Vector2f& vec);
 	sf::Vector2f multiply(const sf::Vector2f& left, const sf::Vector2f& right);
 	float dot(const sf::Vector2f& left, const sf::Vector2f& right);
 	float angleD(const sf::Vector2f& v);

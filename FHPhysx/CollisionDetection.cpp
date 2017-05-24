@@ -39,6 +39,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	//***d
 
 	//setup scene
+	RNGesus rng;
 	CollisionTriangle* m_triangles = new CollisionTriangle[numberOfTriangles];
 	float tmpX = 0, tmpY = 0, tmpFactor = 40.0f;
 	for (int i = 0; i < numberOfTriangles; ++i)
@@ -51,17 +52,19 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			tmpY += tmpFactor;
 		}
 
+		m_triangles[i].init(10.0f, rng.GetNumber());
 		m_triangles[i].setPosition(tmpX, tmpY);
 	}
 
 	CollisionTriangle mouseTriangle;
+	mouseTriangle.init(50.0f, 1337);
 	mouseTriangle.setFillColor(sf::Color(237, 179, 0));
 	sf::CircleShape mouseSBV;
 	mouseSBV.setFillColor(sf::Color::Transparent);
 	mouseSBV.setOutlineColor(sf::Color(255, 121, 57));
 	mouseSBV.setOutlineThickness(.1f);
-	mouseSBV.setRadius(mouseTriangle.getRadius());
-	mouseSBV.setOrigin(mouseTriangle.getRadius(), mouseTriangle.getRadius());
+	mouseSBV.setRadius(mouseTriangle.getLongestSide());
+	mouseSBV.setOrigin(mouseTriangle.getCentroid());
 
 	sf::CircleShape colliderSphere;
 	colliderSphere.setFillColor(sf::Color::Transparent);
@@ -252,9 +255,10 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			if (hit == false)
 				continue;
 
-			float radius = m_triangles[i].getRadius();
+			float radius = m_triangles[i].getLongestSide();
 			colliderSphere.setRadius(radius);
-			colliderSphere.setOrigin(radius, radius);
+			//colliderSphere.setOrigin(radius, radius);
+			colliderSphere.setOrigin(m_triangles[i].getCentroid());
 			colliderSphere.setPosition(triPos);
 			m_window->draw(colliderSphere);
 			//*** sbv
@@ -306,7 +310,7 @@ void CollisionDetection::setRenderWindow(sf::RenderWindow * wndw)
 bool CollisionDetection::CollideSBV(CollisionTriangle first, CollisionTriangle second)
 {
 	float dist = vectorMath::magnitude(first.getPosition() - second.getPosition());
-	float addedRadius = first.getRadius() * first.getScale().x + second.getRadius() * second.getScale().x;
+	float addedRadius = first.getLongestSide() * first.getScale().x + second.getLongestSide() * second.getScale().x;
 
 	if (dist > addedRadius)
 		return false;

@@ -15,6 +15,14 @@ float vectorMath::magnitude(const sf::Vector2f& source)
 	return sqrt((source.x * source.x) + (source.y * source.y));
 }
 
+float vectorMath::max(const sf::Vector2f & vec)
+{
+	if (vec.x > vec.y)
+		return vec.x;
+	else
+		return vec.y;
+}
+
 sf::Vector2f vectorMath::multiply(const sf::Vector2f & left, const sf::Vector2f & right)
 {
 	return sf::Vector2f(left.x*right.x, left.y*right.y);
