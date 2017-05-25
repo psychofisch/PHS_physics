@@ -52,29 +52,23 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			tmpY += tmpFactor;
 		}
 
-		m_triangles[i].init(10.0f, rng.GetNumber());
+		m_triangles[i].init(30.0f, rng.GetNumber());
 		m_triangles[i].setPosition(tmpX, tmpY);
 	}
 
 	CollisionTriangle mouseTriangle;
 	mouseTriangle.init(50.0f, 1337);
 	mouseTriangle.setFillColor(sf::Color(237, 179, 0));
-	sf::CircleShape mouseSBV;
-	mouseSBV.setFillColor(sf::Color::Transparent);
-	mouseSBV.setOutlineColor(sf::Color(255, 121, 57));
-	mouseSBV.setOutlineThickness(.1f);
-	mouseSBV.setRadius(mouseTriangle.getLongestSide());
-	mouseSBV.setOrigin(mouseTriangle.getCentroid());
-
-	sf::CircleShape colliderSphere;
-	colliderSphere.setFillColor(sf::Color::Transparent);
-	colliderSphere.setOutlineColor(sf::Color(255, 121, 57));
-	colliderSphere.setOutlineThickness(1.0f);
 
 	sf::RectangleShape colliderRect;
 	colliderRect.setFillColor(sf::Color::Transparent);
 	colliderRect.setOutlineColor(sf::Color(255, 121, 57));
 	colliderRect.setOutlineThickness(1.0f);
+
+	sf::CircleShape centerCircle;
+	centerCircle.setFillColor(TRIANGLE_COLLIDER_COLOR);
+	centerCircle.setRadius(1.f);
+	centerCircle.setOrigin(sf::Vector2f(1.0f, 1.0f));
 	//*** ss
 
 	unsigned int fps = 0, fpsCount = 0;
@@ -188,12 +182,12 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 		{
 			mouseTriangle.scale(1.1f, 1.1f);
-			mouseSBV.scale(1.1f, 1.1f);
+			//mouseSBV.scale(1.1f, 1.1f);
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 		{
 			mouseTriangle.scale(0.9f, 0.9f);
-			mouseSBV.scale(0.9f, 0.9f);
+			//mouseSBV.scale(0.9f, 0.9f);
 		}
 
 		//*** controls
@@ -220,7 +214,6 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		//}
 
 		mouseTriangle.setPosition(mousePos_mapped);
-		mouseSBV.setPosition(mousePos_mapped);
 
 		++fpsCount;
 
@@ -240,13 +233,16 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		m_window->setView(m_view);
 
 		m_window->draw(mouseTriangle);
-		m_window->draw(mouseSBV);
+		m_window->draw(mouseTriangle.getSBVShape());
 
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
 			m_window->draw(m_triangles[i]);
 
 			sf::Vector2f triPos = m_triangles[i].getPosition();
+
+			centerCircle.setPosition(triPos);
+			m_window->draw(centerCircle);
 
 			//SBV
 			bool hit = CollideSBV(m_triangles[i], mouseTriangle);
@@ -255,12 +251,11 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			if (hit == false)
 				continue;
 
-			float radius = m_triangles[i].getLongestSide();
-			colliderSphere.setRadius(radius);
-			//colliderSphere.setOrigin(radius, radius);
-			colliderSphere.setOrigin(m_triangles[i].getCentroid());
-			colliderSphere.setPosition(triPos);
-			m_window->draw(colliderSphere);
+			m_window->draw(m_triangles[i].getSBVShape());
+
+			/*centerCircle.setPosition(m_triangles[i].getSBVShape().getPosition());
+			m_window->draw(centerCircle);*/
+
 			//*** sbv
 
 			//AABB
@@ -269,8 +264,10 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			if (hit == false)
 				continue;
 
-			colliderRect.setSize(sf::Vector2f(m_triangles[i].getGlobalBounds().width, m_triangles[i].getGlobalBounds().height));
-			colliderRect.setOrigin(colliderRect.getSize() * 0.5f);
+			sf::FloatRect triGlobalBounds = m_triangles[i].getGlobalBounds();
+			colliderRect.setSize(sf::Vector2f(triGlobalBounds.width, triGlobalBounds.height));
+			colliderRect.setOrigin(m_triangles[i].getCentroid());
+			//colliderRect.setPosition(sf::Vector2f(triGlobalBounds.left, triGlobalBounds.top));
 			colliderRect.setPosition(triPos);
 			m_window->draw(colliderRect);
 
