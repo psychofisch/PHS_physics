@@ -35,15 +35,20 @@ void CollisionTriangle::setPosition(const sf::Vector2f& pos)
 	sf::Vector2f points[3] = { this->getPoint(0), this->getPoint(1), this->getPoint(2) };
 	sf::Vector2f testCoords = vectorMath::circumcircleCoords(points);
 	float offset = vectorMath::magnitude(sf::Vector2f(m_sbv.getGlobalBounds().width, m_sbv.getGlobalBounds().height)) * 0.5f - m_sbv.getRadius();
+
+	//testCoords = sf::Vector2f(globalBounds.left, globalBounds.top)/* - vectorMath::magnitude(sf::Vector2f(globalBounds.left, globalBounds.top) - sf::Vector2f(m_sbv.getRadius(), m_sbv.getRadius()))*/;
+
 	m_sbv.setPosition(pos + testCoords /*- sf::Vector2f(offset, offset)*/);
-	m_aabb.setPosition(sf::Vector2f(this->getGlobalBounds().left, this->getGlobalBounds().top));
+
+	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
 }
 
 void CollisionTriangle::init(float size, int seed)
 {
 	this->setFillColor(TRIANGLE_BASE_COLOR);
-
 	this->setPointCount(3);
+
+	sf::FloatRect globalBounds = this->getGlobalBounds();
 
 	RNGesus rng;
 	rng.seed(seed);
@@ -58,7 +63,7 @@ void CollisionTriangle::init(float size, int seed)
 	{
 		float x = rng.GetZeroToOne() * size;
 		float y = rng.GetZeroToOne() * size;
-		//points[i] = sf::Vector2f(x, y);
+		points[i] = sf::Vector2f(x, y);
 		this->setPoint(i, points[i]);
 		m_centroid += points[i];
 	}
@@ -66,17 +71,16 @@ void CollisionTriangle::init(float size, int seed)
 	m_centroid *= 0.3333f;
 	//m_centroid /= 3.f;
 
-	//this->setOrigin(m_centroid);
+	this->setOrigin(m_centroid);
 
 	//SBV
 	float sbvRadius = vectorMath::circumradius(points);
-	sf::Vector2f testCoords = vectorMath::circumcircleCoords(points);
+	//sf::Vector2f testCoords = vectorMath::circumcircleCoords(points);
 	m_sbv.setFillColor(sf::Color::Transparent);
 	m_sbv.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
 	m_sbv.setOutlineThickness(1.f);
 	m_sbv.setRadius(sbvRadius);
-	//m_sbv.setOrigin(testCoords - sf::Vector2f(sbvRadius, sbvRadius));
-	m_sbv.setOrigin(sf::Vector2f(sbvRadius, sbvRadius));
+	m_sbv.setOrigin(sf::Vector2f(sbvRadius, sbvRadius) + m_centroid);
 	//*** sbv
 
 	//AABB
@@ -84,7 +88,6 @@ void CollisionTriangle::init(float size, int seed)
 	m_aabb.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
 	m_aabb.setOutlineThickness(1.0f);
 
-	sf::FloatRect globalBounds = this->getGlobalBounds();
 	m_aabb.setSize(sf::Vector2f(globalBounds.width, globalBounds.height));
 	//m_aabb.setOrigin(m_centroid/* + (sf::Vector2f(globalBounds.width, globalBounds.height))*/);
 	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
@@ -98,8 +101,20 @@ sf::Vector2f CollisionTriangle::getCentroid()
 
 float CollisionTriangle::getLongestSide()
 {
-	sf::Vector2f size = sf::Vector2f(this->getGlobalBounds().width, this->getGlobalBounds().height);
-	return vectorMath::max(size);
+	float t = vectorMath::magnitude(this->getPoint(0) - this->getPoint(2));
+	float u = vectorMath::magnitude(this->getPoint(1) - this->getPoint(2));
+	float s = vectorMath::magnitude(this->getPoint(0) - this->getPoint(1));
+
+	if (t < u)
+		t = u;
+
+	if (u < s)
+		return s;
+	else
+		return u;
+
+	/*sf::Vector2f size = sf::Vector2f(this->getGlobalBounds().width, this->getGlobalBounds().height);
+	return vectorMath::max(size);*/
 }
 
 void CollisionTriangle::isHit(bool hit)

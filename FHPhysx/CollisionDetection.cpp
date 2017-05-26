@@ -247,8 +247,6 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		m_window->draw(mouseTriangle);
 		m_window->draw(mouseTriangle.getSBVShape());
 		m_window->draw(mouseTriangle.getAABBShape());
-		centerCircle.setPosition(mouseTriangle.getSBVShape().getPosition());
-		m_window->draw(centerCircle);
 
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
