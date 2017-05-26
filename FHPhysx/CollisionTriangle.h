@@ -26,9 +26,11 @@ public:
 	void isHit(bool hit);
 
 	sf::CircleShape& getSBVShape();
+	sf::RectangleShape& getAABBShape();
 
 private:
 	sf::Vector2f m_centroid;
 	sf::CircleShape m_sbv;
+	sf::RectangleShape m_aabb;
 };
 

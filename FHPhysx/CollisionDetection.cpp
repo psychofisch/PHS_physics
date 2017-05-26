@@ -60,15 +60,21 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	mouseTriangle.init(50.0f, 1337);
 	mouseTriangle.setFillColor(sf::Color(237, 179, 0));
 
-	sf::RectangleShape colliderRect;
+	/*sf::RectangleShape colliderRect;
 	colliderRect.setFillColor(sf::Color::Transparent);
 	colliderRect.setOutlineColor(sf::Color(255, 121, 57));
-	colliderRect.setOutlineThickness(1.0f);
+	colliderRect.setOutlineThickness(1.0f);*/
 
 	sf::CircleShape centerCircle;
 	centerCircle.setFillColor(TRIANGLE_COLLIDER_COLOR);
 	centerCircle.setRadius(1.f);
 	centerCircle.setOrigin(sf::Vector2f(1.0f, 1.0f));
+
+	/*sf::CircleShape debugCircle;
+	debugCircle.setFillColor(TRIANGLE_BASE_COLOR);
+	debugCircle.setOrigin(sf::Vector2f(10.0f, 10.0f));
+	debugCircle.setRadius(100.f);
+	debugCircle.setPosition(0, 0);*/
 	//*** ss
 
 	unsigned int fps = 0, fpsCount = 0;
@@ -264,15 +270,14 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			if (hit == false)
 				continue;
 
-			sf::FloatRect triGlobalBounds = m_triangles[i].getGlobalBounds();
-			colliderRect.setSize(sf::Vector2f(triGlobalBounds.width, triGlobalBounds.height));
-			colliderRect.setOrigin(m_triangles[i].getCentroid());
-			//colliderRect.setPosition(sf::Vector2f(triGlobalBounds.left, triGlobalBounds.top));
-			colliderRect.setPosition(triPos);
-			m_window->draw(colliderRect);
+			m_window->draw(m_triangles[i].getAABBShape());
 
 			//*** AABB
 		}
+
+		/*centerCircle.setPosition(0, 0);
+		m_window->draw(debugCircle);
+		m_window->draw(centerCircle);*/
 
 		// debug text
 		m_window->setView(m_window->getDefaultView());
