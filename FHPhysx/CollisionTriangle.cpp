@@ -30,16 +30,9 @@ void CollisionTriangle::setPosition(const sf::Vector2f& pos)
 {
 	ConvexShape::setPosition(pos);
 
-	//m_sbv.setPosition(pos);
+	m_sbv.setPosition(pos + m_longestSideCenter);
+	
 	sf::FloatRect globalBounds = this->getGlobalBounds();
-	sf::Vector2f points[3] = { this->getPoint(0), this->getPoint(1), this->getPoint(2) };
-	sf::Vector2f testCoords/* = vectorMath::circumcircleCoords(points)*/;
-	//float offset = vectorMath::magnitude(sf::Vector2f(m_sbv.getGlobalBounds().width, m_sbv.getGlobalBounds().height)) * 0.5f - m_sbv.getRadius();
-
-	testCoords = m_longestSideCenter;
-
-	m_sbv.setPosition(pos + testCoords /*- sf::Vector2f(offset, offset)*/);
-
 	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
 }
 
@@ -67,21 +60,16 @@ void CollisionTriangle::init(float size, int seed)
 	}
 
 	m_centroid *= 0.3333f;
-	//m_centroid /= 3.f;
 
 	this->setOrigin(m_centroid);
 
 	this->getLongestSide();
 
 	//SBV
-	float sbvRadius = vectorMath::circumradius(points);
-	//sf::Vector2f testCoords = vectorMath::circumcircleCoords(points);
+	float sbvRadius = this->getLongestSide() * 0.5f;
 	m_sbv.setFillColor(sf::Color::Transparent);
 	m_sbv.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
 	m_sbv.setOutlineThickness(1.f);
-
-	sbvRadius = this->getLongestSide() * 0.5f;
-
 	m_sbv.setRadius(sbvRadius);
 	m_sbv.setOrigin(sf::Vector2f(sbvRadius, sbvRadius) + m_centroid);
 	//*** sbv
@@ -91,9 +79,7 @@ void CollisionTriangle::init(float size, int seed)
 	m_aabb.setFillColor(sf::Color::Transparent);
 	m_aabb.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
 	m_aabb.setOutlineThickness(1.0f);
-
 	m_aabb.setSize(sf::Vector2f(globalBounds.width, globalBounds.height));
-	//m_aabb.setOrigin(m_centroid/* + (sf::Vector2f(globalBounds.width, globalBounds.height))*/);
 	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
 	//*** aabb
 }
