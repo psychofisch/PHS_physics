@@ -34,4 +34,8 @@ namespace vectorMath {
 	bool isBetween(float a, float p, float b);
 	bool isNotZero(sf::Vector2f& v);
 	sf::FloatRect growBox(sf::FloatRect& r, float f);
+	float circumradius(sf::Vector2f points[3]);
+	sf::Vector2f circumcircleCoords(sf::Vector2f points[3]);
+	float triangleArea(sf::Vector2f points[3]);
+	float pow2(float a);
 }

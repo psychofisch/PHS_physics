@@ -8,6 +8,8 @@
 #include "vector2math.h"
 #include "CollisionTriangle.h"
 
+std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
+
 class CollisionDetection
 {
 public:

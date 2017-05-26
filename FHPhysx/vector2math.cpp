@@ -120,3 +120,40 @@ sf::FloatRect vectorMath::growBox(sf::FloatRect & r, float f)
 {
 	return sf::FloatRect(r.left - f, r.top - f, r.width + (f*2.f), r.height + (f*2.f));
 }
+
+float vectorMath::circumradius(sf::Vector2f points[3])
+{
+	float a = magnitude(points[0] - points[1]);
+	float b = magnitude(points[0] - points[2]);
+	float c = magnitude(points[1] - points[2]);
+	float area = triangleArea(points);
+	return (a*b*c) / (4.0f * area);
+}
+
+sf::Vector2f vectorMath::circumcircleCoords(sf::Vector2f points[3])
+{
+	float d = 2.0f * (points[0].x*(points[1].y - points[2].y) + points[1].x*(points[2].y - points[0].y) + points[2].x*(points[0].y - points[1].y));
+	float x = ((pow2(points[0].x)+ pow2(points[0].y))*(points[1].y-points[2].y) + 
+		(pow2(points[1].x) + pow2(points[1].y))*(points[2].y - points[0].y) + 
+		(pow2(points[2].x) + pow2(points[2].y))*(points[0].y - points[1].y)) / d;
+	
+	float y = ((pow2(points[0].x) + pow2(points[0].y))*(points[1].x - points[2].x) +
+		(pow2(points[1].x) + pow2(points[1].y))*(points[2].x - points[0].x) +
+		(pow2(points[2].x) + pow2(points[2].y))*(points[0].x - points[1].x)) / d;
+
+	return sf::Vector2f(x, -y);//"-y" because reasons...
+}
+
+float vectorMath::triangleArea(sf::Vector2f points[3])
+{
+	float a = magnitude(points[0] - points[1]);
+	float b = magnitude(points[0] - points[2]);
+	float c = magnitude(points[1] - points[2]);
+	float s = (a + b + c) / 2.0f;
+	return sqrtf(s*(s - a)*(s - b)*(s - c));
+}
+
+float vectorMath::pow2(float a)
+{
+	return a*a;
+}

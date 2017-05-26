@@ -59,6 +59,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	CollisionTriangle mouseTriangle;
 	mouseTriangle.init(50.0f, 1337);
 	mouseTriangle.setFillColor(sf::Color(237, 179, 0));
+	mouseTriangle.setPosition(0, 0);
 
 	/*sf::RectangleShape colliderRect;
 	colliderRect.setFillColor(sf::Color::Transparent);
@@ -124,6 +125,10 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 				case sf::Keyboard::H: std::cout << "no one can help you :)" << std::endl;
 					break;
 				case sf::Keyboard::R:
+					std::cout << "Mouse -> " <<	mousePos_mapped << std::endl;
+					std::cout << "SBV -> " << mouseTriangle.getSBVShape().getPosition() << std::endl;
+					std::cout << "SBV-Origin -> " << mouseTriangle.getSBVShape().getOrigin() << std::endl;
+					std::cout << "Centroid -> " << mouseTriangle.getCentroid() << std::endl;
 					break;
 				case sf::Keyboard::M:
 					break;
@@ -220,6 +225,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		//}
 
 		mouseTriangle.setPosition(mousePos_mapped);
+		//mouseTriangle.getSBVShape().setPosition(mousePos_mapped);
 
 		++fpsCount;
 
@@ -240,6 +246,9 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 		m_window->draw(mouseTriangle);
 		m_window->draw(mouseTriangle.getSBVShape());
+		m_window->draw(mouseTriangle.getAABBShape());
+		centerCircle.setPosition(mouseTriangle.getSBVShape().getPosition());
+		m_window->draw(centerCircle);
 
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
@@ -247,7 +256,10 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 			sf::Vector2f triPos = m_triangles[i].getPosition();
 
-			centerCircle.setPosition(triPos);
+			/*centerCircle.setPosition(triPos);
+			m_window->draw(centerCircle);*/
+
+			centerCircle.setPosition(m_triangles[i].getSBVShape().getPosition());
 			m_window->draw(centerCircle);
 
 			//SBV
@@ -311,8 +323,10 @@ void CollisionDetection::setRenderWindow(sf::RenderWindow * wndw)
 
 bool CollisionDetection::CollideSBV(CollisionTriangle first, CollisionTriangle second)
 {
-	float dist = vectorMath::magnitude(first.getPosition() - second.getPosition());
-	float addedRadius = first.getLongestSide() * first.getScale().x + second.getLongestSide() * second.getScale().x;
+	sf::CircleShape& firstSBV = first.getSBVShape();
+	sf::CircleShape& secondSBV = second.getSBVShape();
+	float dist = vectorMath::magnitude(firstSBV.getPosition() - secondSBV.getPosition());
+	float addedRadius = firstSBV.getRadius() * first.getScale().x + secondSBV.getRadius() * second.getScale().x;
 
 	if (dist > addedRadius)
 		return false;
@@ -326,4 +340,10 @@ bool CollisionDetection::CollideAABB(CollisionTriangle first, CollisionTriangle 
 		return true;
 	else
 		return false;
+}
+
+std::ostream & operator<<(std::ostream & os, const sf::Vector2f & v)
+{
+	return os /*<< /*<< "x: "*/ << v.x << ":"
+		/*<< "y: "*/ << v.y;
 }

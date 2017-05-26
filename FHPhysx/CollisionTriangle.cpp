@@ -30,8 +30,13 @@ void CollisionTriangle::setPosition(const sf::Vector2f& pos)
 {
 	ConvexShape::setPosition(pos);
 
-	m_sbv.setPosition(pos);
-	m_aabb.setPosition(pos);
+	//m_sbv.setPosition(pos);
+	sf::FloatRect globalBounds = this->getGlobalBounds();
+	sf::Vector2f points[3] = { this->getPoint(0), this->getPoint(1), this->getPoint(2) };
+	sf::Vector2f testCoords = vectorMath::circumcircleCoords(points);
+	float offset = vectorMath::magnitude(sf::Vector2f(m_sbv.getGlobalBounds().width, m_sbv.getGlobalBounds().height)) * 0.5f - m_sbv.getRadius();
+	m_sbv.setPosition(pos + testCoords /*- sf::Vector2f(offset, offset)*/);
+	m_aabb.setPosition(sf::Vector2f(this->getGlobalBounds().left, this->getGlobalBounds().top));
 }
 
 void CollisionTriangle::init(float size, int seed)
@@ -53,7 +58,7 @@ void CollisionTriangle::init(float size, int seed)
 	{
 		float x = rng.GetZeroToOne() * size;
 		float y = rng.GetZeroToOne() * size;
-		points[i] = sf::Vector2f(x, y);
+		//points[i] = sf::Vector2f(x, y);
 		this->setPoint(i, points[i]);
 		m_centroid += points[i];
 	}
@@ -61,22 +66,29 @@ void CollisionTriangle::init(float size, int seed)
 	m_centroid *= 0.3333f;
 	//m_centroid /= 3.f;
 
-	this->setOrigin(m_centroid);
+	//this->setOrigin(m_centroid);
 
+	//SBV
+	float sbvRadius = vectorMath::circumradius(points);
+	sf::Vector2f testCoords = vectorMath::circumcircleCoords(points);
 	m_sbv.setFillColor(sf::Color::Transparent);
 	m_sbv.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
 	m_sbv.setOutlineThickness(1.f);
-	m_sbv.setRadius(this->getLongestSide() * 0.5f);
-	m_sbv.setOrigin(m_centroid/* + sf::Vector2f(m_sbv.getRadius(), m_sbv.getRadius())*/);
+	m_sbv.setRadius(sbvRadius);
+	//m_sbv.setOrigin(testCoords - sf::Vector2f(sbvRadius, sbvRadius));
+	m_sbv.setOrigin(sf::Vector2f(sbvRadius, sbvRadius));
+	//*** sbv
 
+	//AABB
 	m_aabb.setFillColor(sf::Color::Transparent);
 	m_aabb.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
 	m_aabb.setOutlineThickness(1.0f);
 
 	sf::FloatRect globalBounds = this->getGlobalBounds();
 	m_aabb.setSize(sf::Vector2f(globalBounds.width, globalBounds.height));
-	m_aabb.setOrigin(m_centroid + (sf::Vector2f(globalBounds.width, globalBounds.height) * 0.5f));
+	//m_aabb.setOrigin(m_centroid/* + (sf::Vector2f(globalBounds.width, globalBounds.height))*/);
 	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
+	//*** aabb
 }
 
 sf::Vector2f CollisionTriangle::getCentroid()
