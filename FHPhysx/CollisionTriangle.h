@@ -21,7 +21,8 @@ public:
 	void setPosition(const sf::Vector2f& pos);
 
 	void init(float size, int seed);
-	sf::Vector2f getCentroid();
+	sf::Vector2f getCentroid() const;
+	sf::Vector2f getLongestSideCenter() const;
 	float getLongestSide();
 	void isHit(bool hit);
 
@@ -29,7 +30,8 @@ public:
 	sf::RectangleShape& getAABBShape();
 
 private:
-	sf::Vector2f m_centroid;
+	sf::Vector2f m_centroid,
+		m_longestSideCenter;
 	sf::CircleShape m_sbv;
 	sf::RectangleShape m_aabb;
 };

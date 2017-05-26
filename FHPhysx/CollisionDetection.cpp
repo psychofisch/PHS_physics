@@ -257,7 +257,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			/*centerCircle.setPosition(triPos);
 			m_window->draw(centerCircle);*/
 
-			centerCircle.setPosition(m_triangles[i].getSBVShape().getPosition());
+			centerCircle.setPosition(m_triangles[i].getLongestSideCenter());
 			m_window->draw(centerCircle);
 
 			//SBV
@@ -323,7 +323,7 @@ bool CollisionDetection::CollideSBV(CollisionTriangle first, CollisionTriangle s
 {
 	sf::CircleShape& firstSBV = first.getSBVShape();
 	sf::CircleShape& secondSBV = second.getSBVShape();
-	float dist = vectorMath::magnitude(firstSBV.getPosition() - secondSBV.getPosition());
+	float dist = vectorMath::magnitude(first.getLongestSideCenter() - second.getLongestSideCenter());
 	float addedRadius = firstSBV.getRadius() * first.getScale().x + secondSBV.getRadius() * second.getScale().x;
 
 	if (dist > addedRadius)
