@@ -261,7 +261,9 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			m_window->draw(centerCircle);
 
 			//SBV
-			bool hit = CollideSBV(m_triangles[i], mouseTriangle);
+			bool hit;
+
+			hit = CollideSBV(m_triangles[i], mouseTriangle);
 			m_triangles[i].isHit(hit);
 
 			if (hit == false)

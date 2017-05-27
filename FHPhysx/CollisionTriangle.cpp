@@ -108,17 +108,35 @@ float CollisionTriangle::getLongestSide()
 	if (vectorMath::magnitude(*longest) < vectorMath::magnitude(s))
 		longest = &s;
 
+	sf::Vector2f tmpVec;
+	float radius = vectorMath::magnitude(*longest);
 	if (longest == &t)
-		m_longestSideCenter = this->getPoint(2) +  t * 0.5f;
+	{
+		m_longestSideCenter = this->getPoint(2) + t * 0.5f;
+
+		tmpVec = m_longestSideCenter - this->getPoint(1);
+	}
 	else if (longest == &u)
+	{
 		m_longestSideCenter = this->getPoint(2) + u * 0.5f;
+
+		tmpVec = m_longestSideCenter - this->getPoint(0);
+	}
 	else if (longest == &s)
+	{
 		m_longestSideCenter = this->getPoint(1) + s * 0.5f;
 
-	return vectorMath::magnitude(*longest);
+		tmpVec = m_longestSideCenter - this->getPoint(2);
+	}
 
-	/*sf::Vector2f size = sf::Vector2f(this->getGlobalBounds().width, this->getGlobalBounds().height);
-	return vectorMath::max(size);*/
+	if (vectorMath::magnitude(tmpVec) > (vectorMath::magnitude(*longest) * 0.5f))
+	{
+		float diff = (vectorMath::magnitude(tmpVec) - (vectorMath::magnitude(*longest) * 0.5f)) / vectorMath::magnitude(tmpVec);
+		m_longestSideCenter -= (tmpVec * diff);
+		radius *= 1.0f + diff * 0.5f;
+	}
+
+	return radius;
 }
 
 void CollisionTriangle::isHit(bool hit)
