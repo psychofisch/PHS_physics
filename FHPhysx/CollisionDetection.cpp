@@ -126,8 +126,9 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 					break;
 				case sf::Keyboard::R:
 					std::cout << "Mouse -> " <<	mousePos_mapped << std::endl;
-					std::cout << "SBV -> " << mouseTriangle.getSBVShape().getPosition() << std::endl;
-					std::cout << "SBV-Origin -> " << mouseTriangle.getSBVShape().getOrigin() << std::endl;
+					__debugbreak();
+					std::cout << "OBB -> " << mouseTriangle.getOBBShape().getPosition() << std::endl;
+					std::cout << "OBB-Origin -> " << mouseTriangle.getOBBShape().getOrigin() << std::endl;
 					std::cout << "Centroid -> " << mouseTriangle.getCentroid() << std::endl;
 					break;
 				case sf::Keyboard::M:
@@ -225,7 +226,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		//}
 
 		mouseTriangle.setPosition(mousePos_mapped);
-		//mouseTriangle.getSBVShape().setPosition(mousePos_mapped);
+		//mouseTriangle.getOBBShape().setPosition(mousePos_mapped);
 
 		++fpsCount;
 
@@ -247,6 +248,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		m_window->draw(mouseTriangle);
 		m_window->draw(mouseTriangle.getSBVShape());
 		m_window->draw(mouseTriangle.getAABBShape());
+		m_window->draw(mouseTriangle.getOBBShape());
 
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
@@ -259,6 +261,8 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 			centerCircle.setPosition(m_triangles[i].getLongestSideCenter());
 			m_window->draw(centerCircle);
+
+			m_window->draw(m_triangles[i].getOBBShape());
 
 			//SBV
 			bool hit;
@@ -325,7 +329,7 @@ bool CollisionDetection::CollideSBV(CollisionTriangle first, CollisionTriangle s
 {
 	sf::CircleShape& firstSBV = first.getSBVShape();
 	sf::CircleShape& secondSBV = second.getSBVShape();
-	float dist = vectorMath::magnitude(first.getLongestSideCenter() - second.getLongestSideCenter());
+	float dist = vectorMath::magnitude(first.getSBVCenter() - second.getSBVCenter());
 	float addedRadius = firstSBV.getRadius() * first.getScale().x + secondSBV.getRadius() * second.getScale().x;
 
 	if (dist > addedRadius)

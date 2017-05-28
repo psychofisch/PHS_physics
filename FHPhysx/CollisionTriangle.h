@@ -23,16 +23,24 @@ public:
 	void init(float size, int seed);
 	sf::Vector2f getCentroid() const;
 	sf::Vector2f getLongestSideCenter() const;
-	float getLongestSide();
+	sf::Vector2f getSBVCenter() const;
+	float getLongestSide() const;
+	sf::Vector2f calcLongestSideAndCoords();
 	void isHit(bool hit);
 
 	sf::CircleShape& getSBVShape();
 	sf::RectangleShape& getAABBShape();
+	sf::RectangleShape& getOBBShape();
 
 private:
 	sf::Vector2f m_centroid,
-		m_longestSideCenter;
+		m_longestSideCenter,
+		m_sbvCenter,
+		m_obbOrigin;
+	float m_longestSide,
+		m_obbHeight;
 	sf::CircleShape m_sbv;
-	sf::RectangleShape m_aabb;
+	sf::RectangleShape m_aabb,
+		m_obb;
 };
 

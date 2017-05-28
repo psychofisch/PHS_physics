@@ -30,10 +30,12 @@ void CollisionTriangle::setPosition(const sf::Vector2f& pos)
 {
 	ConvexShape::setPosition(pos);
 
-	m_sbv.setPosition(pos + m_longestSideCenter);
+	m_sbv.setPosition(pos + m_sbvCenter);
 	
 	sf::FloatRect globalBounds = this->getGlobalBounds();
 	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
+	
+	m_obb.setPosition(pos);
 }
 
 void CollisionTriangle::init(float size, int seed)
@@ -63,13 +65,12 @@ void CollisionTriangle::init(float size, int seed)
 
 	this->setOrigin(m_centroid);
 
-	this->getLongestSide();
-
 	//SBV
-	float sbvRadius = this->getLongestSide() * 0.5f;
+	sf::Vector2f longestSide = calcLongestSideAndCoords();
+	float sbvRadius = this->m_longestSide * 0.5f;
 	m_sbv.setFillColor(sf::Color::Transparent);
 	m_sbv.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
-	m_sbv.setOutlineThickness(1.f);
+	m_sbv.setOutlineThickness(.5f);
 	m_sbv.setRadius(sbvRadius);
 	m_sbv.setOrigin(sf::Vector2f(sbvRadius, sbvRadius) + m_centroid);
 	//*** sbv
@@ -78,10 +79,20 @@ void CollisionTriangle::init(float size, int seed)
 	sf::FloatRect globalBounds = this->getGlobalBounds();
 	m_aabb.setFillColor(sf::Color::Transparent);
 	m_aabb.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
-	m_aabb.setOutlineThickness(1.0f);
+	m_aabb.setOutlineThickness(.5f);
 	m_aabb.setSize(sf::Vector2f(globalBounds.width, globalBounds.height));
 	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
 	//*** aabb
+	
+	//OBB
+	m_obb.setFillColor(sf::Color::Transparent);
+	m_obb.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
+	m_obb.setOutlineThickness(.5f);
+	m_obb.setSize(sf::Vector2f(this->m_longestSide, m_obbHeight));
+	m_obb.setOrigin((m_obb.getSize() + m_centroid) * 0.5f);
+	//m_obb.setOrigin(m_obbOrigin + m_obb.getSize() * 0.5f);
+	m_obb.setRotation(vectorMath::angleD(longestSide) + 180.f);
+	//*** obb
 }
 
 sf::Vector2f CollisionTriangle::getCentroid() const
@@ -94,7 +105,12 @@ sf::Vector2f CollisionTriangle::getLongestSideCenter() const
 	return m_longestSideCenter + this->getPosition() - this->getOrigin();
 }
 
-float CollisionTriangle::getLongestSide()
+sf::Vector2f CollisionTriangle::getSBVCenter() const
+{
+	return m_sbvCenter + this->getPosition() - this->getOrigin();
+}
+
+sf::Vector2f CollisionTriangle::calcLongestSideAndCoords()
 {
 	sf::Vector2f t = this->getPoint(0) - this->getPoint(2);
 	sf::Vector2f u = this->getPoint(1) - this->getPoint(2);
@@ -102,41 +118,67 @@ float CollisionTriangle::getLongestSide()
 
 	sf::Vector2f* longest = &t;
 
-	if (vectorMath::magnitude(*longest) < vectorMath::magnitude(u))
+	float tl = vectorMath::magnitude(t);
+	float ul = vectorMath::magnitude(u);
+	float sl = vectorMath::magnitude(s);
+
+	if (vectorMath::magnitude(*longest) < ul)
 		longest = &u;
 
-	if (vectorMath::magnitude(*longest) < vectorMath::magnitude(s))
+	if (vectorMath::magnitude(*longest) < sl)
 		longest = &s;
 
 	sf::Vector2f tmpVec;
-	float radius = vectorMath::magnitude(*longest);
+	float height = sqrtf(2 * (
+		vectorMath::pow2(tl)*vectorMath::pow2(ul) +
+		vectorMath::pow2(ul)*vectorMath::pow2(sl) +
+		vectorMath::pow2(sl)*vectorMath::pow2(tl)
+		) - (
+			powf(tl, 4) + powf(ul, 4) + powf(sl, 4)
+			));
 	if (longest == &t)
 	{
 		m_longestSideCenter = this->getPoint(2) + t * 0.5f;
 
 		tmpVec = m_longestSideCenter - this->getPoint(1);
+		height /= (2 * tl);
+		m_obbOrigin = this->getPoint(2);
 	}
 	else if (longest == &u)
 	{
 		m_longestSideCenter = this->getPoint(2) + u * 0.5f;
 
 		tmpVec = m_longestSideCenter - this->getPoint(0);
+		height /= (2 * ul);
+		m_obbOrigin = this->getPoint(2);
 	}
 	else if (longest == &s)
 	{
 		m_longestSideCenter = this->getPoint(1) + s * 0.5f;
 
 		tmpVec = m_longestSideCenter - this->getPoint(2);
+		height /= (2 * sl);
+		m_obbOrigin = this->getPoint(1);
 	}
+
+	m_sbvCenter = m_longestSideCenter;
 
 	if (vectorMath::magnitude(tmpVec) > (vectorMath::magnitude(*longest) * 0.5f))
 	{
 		float diff = (vectorMath::magnitude(tmpVec) - (vectorMath::magnitude(*longest) * 0.5f)) / vectorMath::magnitude(tmpVec);
-		m_longestSideCenter -= (tmpVec * diff);
-		radius *= 1.0f + diff * 0.5f;
+		m_sbvCenter -= (tmpVec * diff);
+		m_longestSide *= 1.0f + diff * 0.5f;
 	}
 
-	return radius;
+	m_longestSide = vectorMath::magnitude(*longest);
+	m_obbHeight = height;
+
+	return *longest;
+}
+
+float CollisionTriangle::getLongestSide() const
+{
+	return m_longestSide;
 }
 
 void CollisionTriangle::isHit(bool hit)
@@ -155,4 +197,9 @@ sf::CircleShape & CollisionTriangle::getSBVShape()
 sf::RectangleShape & CollisionTriangle::getAABBShape()
 {
 	return m_aabb;
+}
+
+sf::RectangleShape & CollisionTriangle::getOBBShape()
+{
+	return m_obb;
 }
