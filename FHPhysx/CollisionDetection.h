@@ -24,6 +24,8 @@ public:
 
 	static bool CollideSBV(CollisionTriangle first, CollisionTriangle second);
 	static bool CollideAABB(CollisionTriangle first, CollisionTriangle second);
+	bool CollideOBB(CollisionTriangle first, CollisionTriangle second);
+	static bool CollideForeal(CollisionTriangle first, CollisionTriangle second);
 
 	float physxTick;
 

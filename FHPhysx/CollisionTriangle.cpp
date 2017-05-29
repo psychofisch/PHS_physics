@@ -35,7 +35,7 @@ void CollisionTriangle::setPosition(const sf::Vector2f& pos)
 	sf::FloatRect globalBounds = this->getGlobalBounds();
 	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
 	
-	m_obb.setPosition(pos);
+	m_obb.setPosition(pos + m_obbOrigin - m_centroid);
 }
 
 void CollisionTriangle::init(float size, int seed)
@@ -89,9 +89,7 @@ void CollisionTriangle::init(float size, int seed)
 	m_obb.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
 	m_obb.setOutlineThickness(.5f);
 	m_obb.setSize(sf::Vector2f(this->m_longestSide, m_obbHeight));
-	m_obb.setOrigin((m_obb.getSize() + m_centroid) * 0.5f);
-	//m_obb.setOrigin(m_obbOrigin + m_obb.getSize() * 0.5f);
-	m_obb.setRotation(vectorMath::angleD(longestSide) + 180.f);
+	m_obb.setRotation(vectorMath::angleD(longestSide) + 1 * 180.f);
 	//*** obb
 }
 
@@ -113,8 +111,8 @@ sf::Vector2f CollisionTriangle::getSBVCenter() const
 sf::Vector2f CollisionTriangle::calcLongestSideAndCoords()
 {
 	sf::Vector2f t = this->getPoint(0) - this->getPoint(2);
-	sf::Vector2f u = this->getPoint(1) - this->getPoint(2);
-	sf::Vector2f s = this->getPoint(0) - this->getPoint(1);
+	sf::Vector2f u = this->getPoint(2) - this->getPoint(1);
+	sf::Vector2f s = this->getPoint(1) - this->getPoint(0);
 
 	sf::Vector2f* longest = &t;
 
@@ -142,22 +140,24 @@ sf::Vector2f CollisionTriangle::calcLongestSideAndCoords()
 
 		tmpVec = m_longestSideCenter - this->getPoint(1);
 		height /= (2 * tl);
-		m_obbOrigin = this->getPoint(2);
+		m_obbOrigin = this->getPoint(0);
 	}
 	else if (longest == &u)
 	{
-		m_longestSideCenter = this->getPoint(2) + u * 0.5f;
+		m_longestSideCenter = this->getPoint(1) + u * 0.5f;
 
 		tmpVec = m_longestSideCenter - this->getPoint(0);
 		height /= (2 * ul);
+		height *= -1;
 		m_obbOrigin = this->getPoint(2);
 	}
 	else if (longest == &s)
 	{
-		m_longestSideCenter = this->getPoint(1) + s * 0.5f;
+		m_longestSideCenter = this->getPoint(0) + s * 0.5f;
 
 		tmpVec = m_longestSideCenter - this->getPoint(2);
 		height /= (2 * sl);
+		height *= -1;
 		m_obbOrigin = this->getPoint(1);
 	}
 

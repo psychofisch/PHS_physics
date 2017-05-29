@@ -52,6 +52,9 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			tmpY += tmpFactor;
 		}
 
+		/*if (i == 6)
+			__debugbreak();*/
+
 		m_triangles[i].init(30.0f, rng.GetNumber());
 		m_triangles[i].setPosition(tmpX, tmpY);
 	}
@@ -253,22 +256,24 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
 			m_window->draw(m_triangles[i]);
+			m_triangles[i].isHit(false);
 
 			sf::Vector2f triPos = m_triangles[i].getPosition();
 
 			/*centerCircle.setPosition(triPos);
 			m_window->draw(centerCircle);*/
 
-			centerCircle.setPosition(m_triangles[i].getLongestSideCenter());
-			m_window->draw(centerCircle);
+			/*centerCircle.setPosition(m_triangles[i].getLongestSideCenter());
+			m_window->draw(centerCircle);*/
 
-			m_window->draw(m_triangles[i].getOBBShape());
+			//m_window->draw(m_triangles[i].getOBBShape());
+			//CollideOBB(m_triangles[i], mouseTriangle);
 
 			//SBV
 			bool hit;
 
 			hit = CollideSBV(m_triangles[i], mouseTriangle);
-			m_triangles[i].isHit(hit);
+			//hit = true;
 
 			if (hit == false)
 				continue;
@@ -282,13 +287,20 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 			//AABB
 			hit = CollideAABB(m_triangles[i], mouseTriangle);
+			//hit = true;
 
 			if (hit == false)
 				continue;
 
 			m_window->draw(m_triangles[i].getAABBShape());
 
-			//*** AABB
+			//*** aabb
+
+			//real
+			hit = CollideForeal(m_triangles[i], mouseTriangle);
+			m_triangles[i].isHit(hit);
+			continue;
+			//*** real
 		}
 
 		/*centerCircle.setPosition(0, 0);
@@ -344,6 +356,89 @@ bool CollisionDetection::CollideAABB(CollisionTriangle first, CollisionTriangle 
 		return true;
 	else
 		return false;
+}
+
+bool CollisionDetection::CollideOBB(CollisionTriangle first, CollisionTriangle second)
+{
+	sf::RectangleShape firstOBB = first.getOBBShape();
+	sf::RectangleShape secondOBB = second.getOBBShape();
+
+	sf::Vector2f projVector;
+
+	int cutCount = 0;
+
+	sf::RectangleShape debugLine;
+	debugLine.setSize(sf::Vector2f(100.f, 2.f));
+
+	//projection axis
+	for (int i = 0; i < 4; ++i)
+	{
+		if (i == 0)
+		{
+			projVector = vectorMath::rotateD(firstOBB.getPoint(1) - firstOBB.getPoint(0), firstOBB.getRotation());
+		}
+		else if (i == 1)
+		{
+			projVector = vectorMath::rotateD(firstOBB.getPoint(3) - firstOBB.getPoint(0), firstOBB.getRotation());
+		}
+		else if (i == 2)
+		{
+			projVector = vectorMath::rotateD(secondOBB.getPoint(1) - secondOBB.getPoint(0), secondOBB.getRotation());
+		}
+		else if (i == 3)
+		{
+			projVector = vectorMath::rotateD(secondOBB.getPoint(3) - secondOBB.getPoint(0), secondOBB.getRotation());
+		}
+
+		projVector = vectorMath::normalize(projVector);
+
+		debugLine.setRotation(vectorMath::angleD(projVector));
+		m_window->draw(debugLine);
+
+
+	}
+
+	return false;
+}
+
+bool CollisionDetection::CollideForeal(CollisionTriangle first, CollisionTriangle second)
+{
+	sf::Vector2f firstPoints[3] = { first.getPoint(0), first.getPoint(1), first.getPoint(2) };
+	sf::Vector2f secondPoints[3] = { second.getPoint(0), second.getPoint(1), second.getPoint(2) };
+
+	for (int i = 0; i < 3; ++i)
+	{
+		firstPoints[i] += first.getPosition() - first.getOrigin();
+		secondPoints[i] += second.getPosition() - second.getOrigin();
+	}
+
+	if (vectorMath::pointInTriangle(first.getPosition(), secondPoints[0], secondPoints[1], secondPoints[2]))
+	{
+		return true;
+	}
+
+	if (vectorMath::pointInTriangle(second.getPosition(), firstPoints[0], firstPoints[1], firstPoints[2]))
+	{
+		return true;
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		if (vectorMath::pointInTriangle(firstPoints[i], secondPoints[0], secondPoints[1], secondPoints[2]))
+		{
+			return true;
+		}
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		if (vectorMath::pointInTriangle(secondPoints[i], firstPoints[0], firstPoints[1], firstPoints[2]))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 std::ostream & operator<<(std::ostream & os, const sf::Vector2f & v)

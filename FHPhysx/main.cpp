@@ -56,7 +56,7 @@ void main(int argc, const char* argv[])
 	settings.antialiasingLevel = 2;
 
 	sf::RenderWindow window(vm, "PHS Project", sf::Style::Titlebar | sf::Style::Close | sf::Style::Default, settings);
-	window.setFramerateLimit(60);
+	window.setFramerateLimit(144);
 
 	if (mode == MODE_MOONLANDER)
 	{
@@ -82,10 +82,11 @@ void main(int argc, const char* argv[])
 		cd.physxTick = 0.016f;
 		cd.setRenderWindow(&window);
 		cd.StartDemo(324, sf::Vector2i(500, 500));
+		//cd.StartDemo(100, sf::Vector2i(500, 500));
 	}
 
 	window.close();
 
 	std::cout << "thx 4 using this physics project :)";
-	std::cin.ignore();
+	//std::cin.ignore();
 }

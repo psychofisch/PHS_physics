@@ -157,3 +157,19 @@ float vectorMath::pow2(float a)
 {
 	return a*a;
 }
+
+float vectorMath::sign(sf::Vector2f p1, sf::Vector2f p2, sf::Vector2f p3)
+{
+	return (p1.x - p3.x)*(p2.y - p3.y) - (p2.x - p3.x)*(p1.y - p3.y);
+}
+
+bool vectorMath::pointInTriangle(sf::Vector2f point, sf::Vector2f t1, sf::Vector2f t2, sf::Vector2f t3)
+{
+	bool b1, b2, b3;
+
+	b1 = sign(point, t1, t2) < 0.0f;
+	b2 = sign(point, t2, t3) < 0.0f;
+	b3 = sign(point, t3, t1) < 0.0f;
+
+	return ((b1 == b2) && (b2 == b3));
+}
