@@ -84,6 +84,8 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	unsigned int fps = 0, fpsCount = 0;
 	float fpsTimer = 0.f;
 
+	sf::Vector2f outPoints[10];
+
 	bool quit = false;
 	while (!quit)
 	{
@@ -259,6 +261,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			m_triangles[i].isHit(false);
 
 			sf::Vector2f triPos = m_triangles[i].getPosition();
+			sf::Vector2f triCentroid = m_triangles[i].getCentroid();
 
 			/*centerCircle.setPosition(triPos);
 			m_window->draw(centerCircle);*/
@@ -266,8 +269,32 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			/*centerCircle.setPosition(m_triangles[i].getLongestSideCenter());
 			m_window->draw(centerCircle);*/
 
-			//m_window->draw(m_triangles[i].getOBBShape());
+			m_window->draw(m_triangles[i].getOBBShape());
 			//CollideOBB(m_triangles[i], mouseTriangle);
+
+			/*centerCircle.setFillColor(sf::Color::Red);
+			centerCircle.setPosition(triPos - triCentroid + m_triangles[i].getPoint(0));
+			m_window->draw(centerCircle);
+
+			centerCircle.setFillColor(sf::Color::Green);
+			centerCircle.setPosition(triPos - triCentroid + m_triangles[i].getPoint(1));
+			m_window->draw(centerCircle);
+
+			centerCircle.setFillColor(sf::Color::Blue);
+			centerCircle.setPosition(triPos - triCentroid + m_triangles[i].getPoint(2));
+			m_window->draw(centerCircle);*/
+
+			CollideMinkowski(mouseTriangle, m_triangles[i], outPoints);
+			centerCircle.setFillColor(sf::Color::Black);
+			for (int i = 0; i < 9; ++i)
+			{
+				centerCircle.setPosition(mousePos_mapped - mouseTriangle.getCentroid() + /*outPoints[9] + */outPoints[i]);
+				m_window->draw(centerCircle);
+			}
+
+			centerCircle.setFillColor(sf::Color::White);
+			centerCircle.setPosition(outPoints[9]);
+			m_window->draw(centerCircle);
 
 			//SBV
 			bool hit;
@@ -296,10 +323,14 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 			//*** aabb
 
-			//real
-			hit = CollideForeal(m_triangles[i], mouseTriangle);
+			//minkowski
+			//hit = CollideMinkowski(m_triangles[i], mouseTriangle);
 			m_triangles[i].isHit(hit);
-			continue;
+			//*** mk
+
+			//real
+			//hit = CollideForeal(m_triangles[i], mouseTriangle);
+			//m_triangles[i].isHit(hit);
 			//*** real
 		}
 
@@ -401,6 +432,29 @@ bool CollisionDetection::CollideOBB(CollisionTriangle first, CollisionTriangle s
 	return false;
 }
 
+bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTriangle second, sf::Vector2f* outPoints)
+{
+	sf::Vector2f sum[9];
+
+	//invert second
+	for(int i = 0; i < 3; ++i)
+		second.setPoint(i, second.getCentroid() - second.getPoint(i));
+
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			//sum[(i * 3) + j] = (first.getPosition() - first.getCentroid() + first.getPoint(i)) + (second.getPosition() - second.getCentroid() + second.getPoint(j));
+			sum[(i * 3) + j] = first.getPoint(i) + second.getPoint(j);
+			outPoints[(i * 3) + j] = sum[(i * 3) + j];
+		}
+	}
+
+	outPoints[9] = (((first.getPosition()) + (second.getPosition())) * 0.5f);
+
+	return false;
+}
+
 bool CollisionDetection::CollideForeal(CollisionTriangle first, CollisionTriangle second)
 {
 	sf::Vector2f firstPoints[3] = { first.getPoint(0), first.getPoint(1), first.getPoint(2) };
@@ -412,6 +466,18 @@ bool CollisionDetection::CollideForeal(CollisionTriangle first, CollisionTriangl
 		secondPoints[i] += second.getPosition() - second.getOrigin();
 	}
 
+	/*sf::Vector2f intersection;
+
+	for (int i = 0; i < 6; ++i)
+	{
+		sf::Vector2fLines lineA = sf::Vector2fLines(firstPoints[0], firstPoints[1]),
+							lineB = sf::Vector2fLines(secondPoints[0], secondPoints[1]);
+		intersection = vectorMath::lineIntersection(lineA, lineB);
+
+		if(vectorMath::magnitude())
+	}*/
+
+	//point in triangle method
 	if (vectorMath::pointInTriangle(first.getPosition(), secondPoints[0], secondPoints[1], secondPoints[2]))
 	{
 		return true;
@@ -437,6 +503,7 @@ bool CollisionDetection::CollideForeal(CollisionTriangle first, CollisionTriangl
 			return true;
 		}
 	}
+	//*** pitm
 
 	return false;
 }

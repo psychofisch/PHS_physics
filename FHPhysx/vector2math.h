@@ -38,6 +38,6 @@ namespace vectorMath {
 	sf::Vector2f circumcircleCoords(sf::Vector2f points[3]);
 	float triangleArea(sf::Vector2f points[3]);
 	float pow2(float a);
-	float sign(sf::Vector2f p1, sf::Vector2f p2, sf::Vector2f p3);
+	float sign(sf::Vector2f point, sf::Vector2f p1, sf::Vector2f p2);
 	bool pointInTriangle(sf::Vector2f point, sf::Vector2f t1, sf::Vector2f t2, sf::Vector2f t3);
 }

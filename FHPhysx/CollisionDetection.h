@@ -25,6 +25,7 @@ public:
 	static bool CollideSBV(CollisionTriangle first, CollisionTriangle second);
 	static bool CollideAABB(CollisionTriangle first, CollisionTriangle second);
 	bool CollideOBB(CollisionTriangle first, CollisionTriangle second);
+	static bool CollideMinkowski(CollisionTriangle first, CollisionTriangle second, sf::Vector2f* outPoints);
 	static bool CollideForeal(CollisionTriangle first, CollisionTriangle second);
 
 	float physxTick;

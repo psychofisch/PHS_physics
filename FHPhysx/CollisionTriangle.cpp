@@ -40,25 +40,46 @@ void CollisionTriangle::setPosition(const sf::Vector2f& pos)
 
 void CollisionTriangle::init(float size, int seed)
 {
+	std::random_device rng;
+	std::mt19937 urng(rng());
+	urng.seed(0);
+	std::uniform_real_distribution<> zeroToOne(0, 1);
+	//random number between 0 and 1: zeroToOne(urng)
+
 	this->setFillColor(TRIANGLE_BASE_COLOR);
+	m_baseColor = TRIANGLE_BASE_COLOR;
 	this->setPointCount(3);
 
-	RNGesus rng;
-	rng.seed(seed);
+	//RNGesus rng;
+	//rng.seed(seed);
 
 	sf::Vector2f* points = new sf::Vector2f[3];
 	points[0] = sf::Vector2f(0, 0);
 	points[1] = sf::Vector2f(size, 0);
 	points[2] = sf::Vector2f(size * 0.5f, size);
 
-	m_centroid = sf::Vector2f(0,0);
+	m_centroid = sf::Vector2f(0, 0);
 	for (int i = 0; i < 3; ++i)
 	{
-		float x = rng.GetZeroToOne() * size;
-		float y = rng.GetZeroToOne() * size;
+		//float x = rng.GetZeroToOne() * size;
+		//float y = rng.GetZeroToOne() * size;
+		float x = zeroToOne(urng) * size;
+		float y = zeroToOne(urng) * size;
 		points[i] = sf::Vector2f(x, y);
-		this->setPoint(i, points[i]);
+		//this->setPoint(i, points[i]);
 		m_centroid += points[i];
+	}
+
+	if (vectorMath::sign(points[0], points[1], points[2]) < 0.0f)//fix "clockwise-counterclockwise" issue with OBB
+	{
+		sf::Vector2f tmp = points[1];
+		points[1] = points[2];
+		points[2] = tmp;
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		this->setPoint(i, points[i]);
 	}
 
 	m_centroid *= 0.3333f;
@@ -88,8 +109,8 @@ void CollisionTriangle::init(float size, int seed)
 	m_obb.setFillColor(sf::Color::Transparent);
 	m_obb.setOutlineColor(TRIANGLE_COLLIDER_COLOR);
 	m_obb.setOutlineThickness(.5f);
-	m_obb.setSize(sf::Vector2f(this->m_longestSide, m_obbHeight));
-	m_obb.setRotation(vectorMath::angleD(longestSide) + 1 * 180.f);
+	m_obb.setSize(sf::Vector2f(-this->m_longestSide, m_obbHeight));
+	m_obb.setRotation(vectorMath::angleD(longestSide));
 	//*** obb
 }
 
@@ -148,7 +169,6 @@ sf::Vector2f CollisionTriangle::calcLongestSideAndCoords()
 
 		tmpVec = m_longestSideCenter - this->getPoint(0);
 		height /= (2 * ul);
-		height *= -1;
 		m_obbOrigin = this->getPoint(2);
 	}
 	else if (longest == &s)
@@ -157,7 +177,6 @@ sf::Vector2f CollisionTriangle::calcLongestSideAndCoords()
 
 		tmpVec = m_longestSideCenter - this->getPoint(2);
 		height /= (2 * sl);
-		height *= -1;
 		m_obbOrigin = this->getPoint(1);
 	}
 
@@ -171,7 +190,7 @@ sf::Vector2f CollisionTriangle::calcLongestSideAndCoords()
 	}
 
 	m_longestSide = vectorMath::magnitude(*longest);
-	m_obbHeight = height;
+	m_obbHeight = abs(height);
 
 	return *longest;
 }
@@ -186,7 +205,8 @@ void CollisionTriangle::isHit(bool hit)
 	if (hit)
 		this->setFillColor(TRIANGLE_HIT_COLOR);
 	else
-		this->setFillColor(TRIANGLE_BASE_COLOR);
+		//this->setFillColor(TRIANGLE_BASE_COLOR);
+		this->setFillColor(m_baseColor);
 }
 
 sf::CircleShape & CollisionTriangle::getSBVShape()

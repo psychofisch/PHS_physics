@@ -7,7 +7,7 @@ class RNGesus
 {
 public:
 	RNGesus()
-		:RNGesus(123, 456, 789)
+		:RNGesus(1337, 420, 123456789)
 	{
 	}
 

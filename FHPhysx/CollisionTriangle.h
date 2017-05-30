@@ -1,5 +1,7 @@
 #pragma once
 
+#include <random>
+
 #include <SFML\Graphics.hpp>
 
 #include "RNGesus.h"
@@ -39,6 +41,7 @@ private:
 		m_obbOrigin;
 	float m_longestSide,
 		m_obbHeight;
+	sf::Color m_baseColor;
 	sf::CircleShape m_sbv;
 	sf::RectangleShape m_aabb,
 		m_obb;
