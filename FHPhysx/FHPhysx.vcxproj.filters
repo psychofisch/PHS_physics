@@ -30,6 +30,12 @@
     <ClCompile Include="vector2math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Hull.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HullPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Space2D.h">
@@ -45,6 +51,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RNGesus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hull.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HullPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

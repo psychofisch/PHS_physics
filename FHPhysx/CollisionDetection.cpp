@@ -284,18 +284,24 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			centerCircle.setPosition(triPos - triCentroid + m_triangles[i].getPoint(2));
 			m_window->draw(centerCircle);*/
 
-			CollideMinkowski(mouseTriangle, m_triangles[i], outPoints);
+			int outCount = 0;
+			//bool realhit = CollideMinkowski(mouseTriangle, m_triangles[i], outPoints, &outCount);
+			bool realhit = CollideMinkowski(m_triangles[i], mouseTriangle, outPoints, &outCount);
 			centerCircle.setFillColor(sf::Color::Black);
-			for (int i = 0; i < 9; ++i)
+			for (int i = 0; i < outCount; ++i)
 			{
-				centerCircle.setPosition(mousePos_mapped - mouseTriangle.getCentroid() + /*outPoints[9] + */outPoints[i]);
+				centerCircle.setPosition(/*mousePos_mapped - mouseTriangle.getCentroid() + /*outPoints[9] + */outPoints[i]);
 				m_window->draw(centerCircle);
 			}
 
 			centerCircle.setFillColor(sf::Color::White);
-			centerCircle.setPosition(outPoints[9]);
+			//centerCircle.setPosition(outPoints[9]);
+			centerCircle.setPosition(sf::Vector2f());
 			m_window->draw(centerCircle);
 
+			m_triangles[i].isHit(realhit);
+
+			continue;
 			//SBV
 			bool hit;
 
@@ -432,7 +438,7 @@ bool CollisionDetection::CollideOBB(CollisionTriangle first, CollisionTriangle s
 	return false;
 }
 
-bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTriangle second, sf::Vector2f* outPoints)
+bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTriangle second, sf::Vector2f* outPoints, int* outCount)
 {
 	sf::Vector2f sum[9];
 
@@ -444,15 +450,40 @@ bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTria
 	{
 		for (int j = 0; j < 3; ++j)
 		{
-			//sum[(i * 3) + j] = (first.getPosition() - first.getCentroid() + first.getPoint(i)) + (second.getPosition() - second.getCentroid() + second.getPoint(j));
-			sum[(i * 3) + j] = first.getPoint(i) + second.getPoint(j);
+			sum[(i * 3) + j] = (first.getPosition() - first.getCentroid() + first.getPoint(i)) + (second.getPosition() - second.getCentroid() + second.getPoint(j));
+			//sum[(i * 3) + j] = first.getPoint(i) + second.getPoint(j);
 			outPoints[(i * 3) + j] = sum[(i * 3) + j];
 		}
 	}
 
 	outPoints[9] = (((first.getPosition()) + (second.getPosition())) * 0.5f);
+	*outCount = 9;
 
-	return false;
+	std::vector<sf::Vector2f> pointVector;
+	pointVector.resize(9);
+	for (int i = 0; i < 9; ++i)
+		pointVector[i] = outPoints[i];
+	Hull* hull = ConvexHull(pointVector, -1);
+	Hull* hullFirst = hull;
+	int cnt = 1;
+	outPoints[0] = hull->GetPoint();
+	while (hullFirst != hull->Next)
+	{	
+		hull = hull->Next;
+		outPoints[cnt] = hull->GetPoint();
+		++cnt;
+	}
+	*outCount = cnt;
+
+	for (int i = 0; i < cnt - 1; ++i)
+	{
+		float right = vectorMath::sign(sf::Vector2f(0, 0), outPoints[i], outPoints[i + 1]);
+
+		if (right < 0.0f)
+			return false;
+	}
+
+	return true;
 }
 
 bool CollisionDetection::CollideForeal(CollisionTriangle first, CollisionTriangle second)
@@ -507,6 +538,139 @@ bool CollisionDetection::CollideForeal(CollisionTriangle first, CollisionTriangl
 
 	return false;
 }
+
+Hull * CollisionDetection::ConvexHull(std::vector<sf::Vector2f>& points, int recursionDepth)
+{
+	Hull* hull = nullptr;
+
+	if (recursionDepth == 0)
+		return hull;
+
+	std::vector<sf::Vector2f>::const_iterator left(points.begin()), right(points.begin()), top(points.begin()), bottom(points.begin());
+	for (std::vector<sf::Vector2f>::const_iterator it = points.begin(); it != points.end(); ++it)
+	{
+		if (it->x < left->x)
+			left = it;
+
+		if (it->x > right->x)
+			right = it;
+	}
+
+	hull = new Hull(*left);
+	hull->InsertNext(*right);
+
+	if (recursionDepth == 1)
+		return hull;
+
+	Hull *A = hull, *B = hull->Next;
+	std::vector<HullPoint> topSet, bottomSet;
+	for (std::vector<sf::Vector2f>::const_iterator it = points.begin(); it != points.end(); ++it)
+	{
+		if (*it == *A || *it == *B)
+			continue;
+
+		HullPoint point(*it, *A, *B);
+		//TODO: CHECK (CW) vs (CCW)
+		if (point.GetSide() == Left)
+			topSet.push_back(point);
+		else
+			bottomSet.push_back(point);
+	}
+
+	HullSet(A, B, topSet, recursionDepth);
+	HullSet(B, A, bottomSet, recursionDepth);
+
+	return hull;
+}
+
+void CollisionDetection::HullSet(::Hull * A, Hull * B, std::vector<HullPoint>& points, int recursionDepth)
+{
+	if (points.size() == 0 || recursionDepth == 0)
+		return;
+
+	if (points.size() == 1)
+	{
+		A->InsertNext(points[0]);
+		return;
+	}
+
+	std::vector<HullPoint>::iterator farthest = points.begin();
+	for (std::vector<HullPoint>::iterator it = points.begin(); it != points.end(); ++it)
+	{
+		if (it->GetDistance() > farthest->GetDistance())
+			farthest = it;
+	}
+
+	Hull* P = A->InsertNext(*farthest);
+	points.erase(farthest);
+
+	std::vector<HullPoint> setAP, setPB;
+	for (std::vector<HullPoint>::const_iterator it = points.begin(); it != points.end(); ++it)
+	{
+		HullPoint point(*it, *A, *P);
+		//TODO: CHECK (CW) vs (CCW)
+		if (point.GetSide() == Left)
+			setAP.push_back(point);
+	}
+	for (std::vector<HullPoint>::const_iterator it = points.begin(); it != points.end(); ++it)
+	{
+		HullPoint point(*it, *P, *B);
+		//TODO: CHECK (CW) vs (CCW)
+		if (point.GetSide() == Left)
+			setPB.push_back(point);
+	}
+
+	HullSet(A, P, setAP, recursionDepth - 1);
+	HullSet(P, B, setPB, recursionDepth - 1);
+}
+
+//int CollisionDetection::ConvexHull(sf::Vector2f* points, size_t pointSize, int recursionDepth, sf::Vector2f* hullOut)
+//{
+//	//Hull* hull = nullptr;
+//
+//	if (recursionDepth == 0)
+//		return hull;
+//
+//	size_t left, right, top, bottom;
+//	left = right = top = bottom = 0;
+//	
+//	for(int i = 0; i < pointSize; ++i)
+//	{
+//		if (points[i].x < points[left].x)
+//			left = i;
+//
+//		if (points[i].x > points[right].x)
+//			right = i;
+//	}
+//
+//	hull = new Hull(*left);
+//	hull->InsertNext(*right);
+//
+//	if (recursionDepth == 1)
+//		return hull;
+//
+//	size_t A = hull, B = hull + 1;
+//	//Hull *A = hull, *B = hull->Next;
+//	std::vector<HullPoint> topSet, bottomSet;
+//	for (int i = 0; i < pointSize; ++i)
+//	{
+//		if (points[i] == points[A] || points[i] == points[B])
+//			continue;
+//
+//		HullPoint point(*it, *A, *B);
+//		float left = vectorMath::sign(points[i], points[A], points[B]);
+//		//TODO: CHECK (CW) vs (CCW)
+//		if (left > 0.f)
+//			topSet.push_back(point);
+//		else
+//			bottomSet.push_back(point);
+//	}
+//
+//	i_HullSet(A, B, topSet, recursionDepth);
+//	i_HullSet(B, A, bottomSet, recursionDepth);
+//
+//	return hull;
+//}
 
 std::ostream & operator<<(std::ostream & os, const sf::Vector2f & v)
 {

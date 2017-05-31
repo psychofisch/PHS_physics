@@ -160,7 +160,8 @@ float vectorMath::pow2(float a)
 
 float vectorMath::sign(sf::Vector2f point, sf::Vector2f p1, sf::Vector2f p2)
 {
-	return (point.x - p2.x)*(p1.y - p2.y) - (p1.x - p2.x)*(point.y - p2.y);
+	//return (point.x - p2.x)*(p1.y - p2.y) - (p1.x - p2.x)*(point.y - p2.y);
+	return (p2.x - p1.x)*(point.y - p1.y) - (point.x - p1.x)*(p2.y - p1.y);
 }
 
 bool vectorMath::pointInTriangle(sf::Vector2f point, sf::Vector2f t1, sf::Vector2f t2, sf::Vector2f t3)

@@ -7,6 +7,8 @@
 
 #include "vector2math.h"
 #include "CollisionTriangle.h"
+#include "Hull.h"
+#include "HullPoint.h"
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
 
@@ -25,8 +27,12 @@ public:
 	static bool CollideSBV(CollisionTriangle first, CollisionTriangle second);
 	static bool CollideAABB(CollisionTriangle first, CollisionTriangle second);
 	bool CollideOBB(CollisionTriangle first, CollisionTriangle second);
-	static bool CollideMinkowski(CollisionTriangle first, CollisionTriangle second, sf::Vector2f* outPoints);
+	static bool CollideMinkowski(CollisionTriangle first, CollisionTriangle second, sf::Vector2f* outPoints, int* outCount);
 	static bool CollideForeal(CollisionTriangle first, CollisionTriangle second);
+	static Hull* ConvexHull(std::vector<sf::Vector2f>& points, int recursionDepth);
+	static void HullSet(::Hull* A, Hull* B, std::vector<HullPoint>& points, int recursionDepth);
+	
+	static int ConvexHull(sf::Vector2f* points, size_t pointSize, int recursionDepth, sf::Vector2f* hullOut);
 
 	float physxTick;
 
@@ -35,5 +41,7 @@ private:
 	sf::RenderWindow* m_window;
 	sf::View m_view;
 	bool m_debug;
+
+	static void i_HullSet(::Hull* A, Hull* B, std::vector<HullPoint>& points, int& recursionDepth);
 };
 
