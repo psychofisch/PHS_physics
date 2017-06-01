@@ -10,6 +10,7 @@ enum MODE { MODE_MOONLANDER = 0, MODE_COLLISION };
 void main(int argc, const char* argv[])
 {
 	bool debug = false;
+	int triangles = 324;
 	MODE mode = MODE_MOONLANDER;
 
 	for (int i = 1; i < argc; ++i)
@@ -22,12 +23,10 @@ void main(int argc, const char* argv[])
 			else if (strcmp(argv[i], "collision") == 0)
 				mode =	MODE_COLLISION;
 		}
-		/*else if (strcmp(argv[i], "--threads") == 0)
+		else if (strcmp(argv[i], "--triangles") == 0)
 		{
-			threads = atoi(argv[++i]);
-			if (debug)
-				DEBUG(threads);
-		}
+			triangles = atoi(argv[++i]);
+		}/*
 		else if (strcmp(argv[i], "--platformId") == 0)
 		{
 			platformId = atoi(argv[++i]);
@@ -81,7 +80,7 @@ void main(int argc, const char* argv[])
 		cd.setDebugMode(true);
 		cd.physxTick = 0.016f;
 		cd.setRenderWindow(&window);
-		cd.StartDemo(324, sf::Vector2i(500, 500));
+		cd.StartDemo(triangles, sf::Vector2i(500, 500));
 		//cd.StartDemo(100, sf::Vector2i(500, 500));
 	}
 

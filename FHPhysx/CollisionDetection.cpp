@@ -18,6 +18,9 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	sf::Vector2f windowCenter(m_window->getSize());
 	windowCenter /= 2.0f;
 
+	m_uiView.setCenter(windowCenter);
+	m_uiView.setSize(windowCenter * 2.0f);
+
 	sf::Clock time;
 	float dt = 0.16f;
 	//float tickRun = tick;
@@ -42,12 +45,13 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	RNGesus rng;
 	rng.seed(420);
 	CollisionTriangle* m_triangles = new CollisionTriangle[numberOfTriangles];
-	float tmpX = 0, tmpY = 0, tmpFactor = 20.0f;
+	float tmpX = 0, tmpY = 0, tmpFactor = 30.0f;
+	int gap = round(sqrtf(numberOfTriangles));
 	for (int i = 0; i < numberOfTriangles; ++i)
 	{
 		tmpX += tmpFactor;
 
-		if (i % 18 == 0)
+		if (i % gap == 0)
 		{
 			tmpX = tmpFactor;
 			tmpY += tmpFactor;
@@ -173,6 +177,11 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 				m_view = sf::View(sf::FloatRect(0, 0, static_cast<float>(eve.size.width), static_cast<float>(eve.size.height)));
 				//sf::Vector2f view_center((m_grid[0].getPosition() + m_grid[m_grid.size() - 1].getPosition()) / 2.0f);
 				m_view.setCenter(sf::Vector2f(0, 0));
+				windowCenter = sf::Vector2f(m_window->getSize());
+				windowCenter /= 2.0f;
+
+				m_uiView.setCenter(windowCenter);
+				m_uiView.setSize(windowCenter * 2.0f);
 			}
 		}
 
@@ -197,16 +206,14 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 			m_view.move(sf::Vector2f(1.f, 0.f)*50.0f*dt);
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+		/*if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 		{
 			mouseTriangle.scale(1.1f);
-			//mouseSBV.scale(1.1f, 1.1f);
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 		{
 			mouseTriangle.scale(0.9f);
-			//mouseSBV.scale(0.9f, 0.9f);
-		}
+		}*/
 
 		//*** controls
 
@@ -232,7 +239,6 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		//}
 
 		mouseTriangle.setPosition(mousePos_mapped);
-		//mouseTriangle.getOBBShape().setPosition(mousePos_mapped);
 
 		++fpsCount;
 
@@ -335,17 +341,15 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 		m_window->draw(centerCircle);*/
 
 		// debug text
-		m_window->setView(m_window->getDefaultView());
+		m_window->setView(m_uiView);
 
 		debugString.str(std::string());//to clean string
-									   //int fps = int(1.f / dt);
 		debugString << fps << std::endl;
 		debugString << static_cast<int>(mousePos_mapped.x) << ":" << static_cast<int>(mousePos_mapped.y) << std::endl;
 		debug_text.setString(debugString.str());
 
 		m_window->draw(debug_text);
 		//*** dt
-		//m_window->draw(m_currentTile);
 
 		m_window->display();
 		//*** render

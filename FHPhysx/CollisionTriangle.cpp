@@ -65,7 +65,6 @@ void CollisionTriangle::init(float size, int seed)
 	//random number between 0 and 1: zeroToOne(urng)
 
 	this->setFillColor(TRIANGLE_BASE_COLOR);
-	m_baseColor = TRIANGLE_BASE_COLOR;
 	this->setPointCount(3);
 
 	//RNGesus rng;
@@ -223,8 +222,7 @@ void CollisionTriangle::isHit(bool hit)
 	if (hit)
 		this->setFillColor(TRIANGLE_HIT_COLOR);
 	else
-		//this->setFillColor(TRIANGLE_BASE_COLOR);
-		this->setFillColor(m_baseColor);
+		this->setFillColor(TRIANGLE_BASE_COLOR);
 }
 
 sf::CircleShape & CollisionTriangle::getSBVShape()

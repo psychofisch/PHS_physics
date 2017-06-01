@@ -39,7 +39,8 @@ public:
 private:
 	sf::Vector2u m_dimension;
 	sf::RenderWindow* m_window;
-	sf::View m_view;
+	sf::View m_view,
+		m_uiView;
 	bool m_debug;
 
 	static void i_HullSet(::Hull* A, Hull* B, std::vector<HullPoint>& points, int& recursionDepth);
