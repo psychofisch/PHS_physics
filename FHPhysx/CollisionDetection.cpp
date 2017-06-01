@@ -84,7 +84,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	unsigned int fps = 0, fpsCount = 0;
 	float fpsTimer = 0.f;
 
-	sf::Vector2f outPoints[10];
+	sf::Vector2f* outPoints = new sf::Vector2f[10];
 
 	bool quit = false;
 	while (!quit)
@@ -269,7 +269,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			/*centerCircle.setPosition(m_triangles[i].getLongestSideCenter());
 			m_window->draw(centerCircle);*/
 
-			m_window->draw(m_triangles[i].getOBBShape());
+			//m_window->draw(m_triangles[i].getOBBShape());
 			//CollideOBB(m_triangles[i], mouseTriangle);
 
 			/*centerCircle.setFillColor(sf::Color::Red);
@@ -284,24 +284,6 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			centerCircle.setPosition(triPos - triCentroid + m_triangles[i].getPoint(2));
 			m_window->draw(centerCircle);*/
 
-			int outCount = 0;
-			//bool realhit = CollideMinkowski(mouseTriangle, m_triangles[i], outPoints, &outCount);
-			bool realhit = CollideMinkowski(m_triangles[i], mouseTriangle, outPoints, &outCount);
-			centerCircle.setFillColor(sf::Color::Black);
-			for (int i = 0; i < outCount; ++i)
-			{
-				centerCircle.setPosition(/*mousePos_mapped - mouseTriangle.getCentroid() + /*outPoints[9] + */outPoints[i]);
-				m_window->draw(centerCircle);
-			}
-
-			centerCircle.setFillColor(sf::Color::White);
-			//centerCircle.setPosition(outPoints[9]);
-			centerCircle.setPosition(sf::Vector2f());
-			m_window->draw(centerCircle);
-
-			m_triangles[i].isHit(realhit);
-
-			continue;
 			//SBV
 			bool hit;
 
@@ -330,7 +312,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			//*** aabb
 
 			//minkowski
-			//hit = CollideMinkowski(m_triangles[i], mouseTriangle);
+			hit = CollideMinkowski(m_triangles[i], mouseTriangle);
 			m_triangles[i].isHit(hit);
 			//*** mk
 
@@ -362,6 +344,8 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 		dt = time.getElapsedTime().asSeconds();
 	}
+
+	delete[] outPoints;
 }
 
 void CollisionDetection::setDebugMode(bool d)
@@ -438,7 +422,7 @@ bool CollisionDetection::CollideOBB(CollisionTriangle first, CollisionTriangle s
 	return false;
 }
 
-bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTriangle second, sf::Vector2f* outPoints, int* outCount)
+bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTriangle second)
 {
 	sf::Vector2f sum[9];
 
@@ -452,37 +436,32 @@ bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTria
 		{
 			//sum[(i * 3) + j] = (first.getPosition() - first.getCentroid() + first.getPoint(i)) + (second.getPosition() - second.getCentroid() + second.getPoint(j));
 			sum[(i * 3) + j] = first.getPosition() - first.getCentroid() + first.getPoint(i) + second.getPoint(j);
-			outPoints[(i * 3) + j] = sum[(i * 3) + j];
 		}
 	}
-
-	outPoints[9] = (((first.getPosition()) + (second.getPosition())) * 0.5f);
-	*outCount = 9;
 
 	std::vector<sf::Vector2f> pointVector;
 	pointVector.resize(9);
 	for (int i = 0; i < 9; ++i)
-		pointVector[i] = outPoints[i];
+		pointVector[i] = sum[i];
 	Hull* hull = ConvexHull(pointVector, -1);
 	Hull* hullFirst = hull;
 	int cnt = 1;
-	outPoints[0] = hull->GetPoint();
+	sum[0] = hull->GetPoint();
 	while (hullFirst != hull->Next)
 	{	
 		hull = hull->Next;
-		outPoints[cnt] = hull->GetPoint();
+		sum[cnt] = hull->GetPoint();
 		++cnt;
 	}
-	*outCount = cnt;
 
 	sf::Vector2f target = second.getPosition();
 	for (int i = 0; i < cnt; ++i)
 	{
 		float right;
 		if(i < cnt - 1)
-			right = vectorMath::sign(target, outPoints[i], outPoints[i + 1]);
+			right = vectorMath::sign(target, sum[i], sum[i + 1]);
 		else
-			right = vectorMath::sign(target, outPoints[i], outPoints[0]);
+			right = vectorMath::sign(target, sum[i], sum[0]);
 
 		if (right < 0.0f)
 			return false;
