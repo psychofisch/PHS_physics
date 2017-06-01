@@ -56,7 +56,7 @@ void main(int argc, const char* argv[])
 	settings.antialiasingLevel = 2;
 
 	sf::RenderWindow window(vm, "PHS Project", sf::Style::Titlebar | sf::Style::Close | sf::Style::Default, settings);
-	window.setFramerateLimit(144);
+	//window.setFramerateLimit(144);
 
 	if (mode == MODE_MOONLANDER)
 	{

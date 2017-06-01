@@ -42,7 +42,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 	RNGesus rng;
 	rng.seed(420);
 	CollisionTriangle* m_triangles = new CollisionTriangle[numberOfTriangles];
-	float tmpX = 0, tmpY = 0, tmpFactor = 40.0f;
+	float tmpX = 0, tmpY = 0, tmpFactor = 20.0f;
 	for (int i = 0; i < numberOfTriangles; ++i)
 	{
 		tmpX += tmpFactor;
@@ -258,50 +258,76 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
+			bool sbvHit, aabbHit, obbHit, minkowskiHit;
+			sbvHit = aabbHit = obbHit = minkowskiHit = false;
+
+			for (int j = -1; j < numberOfTriangles; ++j)
+			{
+				if (i == j)
+					continue;
+
+				CollisionTriangle* tmpTriangle;
+				bool hit;
+
+				if (j == -1)
+					tmpTriangle = &mouseTriangle;
+				else
+					tmpTriangle = &m_triangles[j];
+
+				sf::Vector2f triPos = m_triangles[i].getPosition();
+				sf::Vector2f triCentroid = m_triangles[i].getCentroid();
+
+				/*centerCircle.setPosition(triPos);
+				m_window->draw(centerCircle);*/
+
+				//SBV
+				hit = CollideSBV(m_triangles[i], *tmpTriangle);
+				//hit = true;
+
+				if (hit == false)
+					continue;
+				sbvHit = true;
+				//*** sbv
+
+				//AABB
+				hit = CollideAABB(m_triangles[i], *tmpTriangle);
+				//hit = true;
+
+				if (hit == false)
+					continue;
+				aabbHit = true;
+				//*** aabb
+
+				//OBB
+				hit = CollideOBB(m_triangles[i], *tmpTriangle);
+
+				if (hit == false)
+					continue;
+				obbHit = true;
+				//*** obb
+
+				//minkowski
+				hit = CollideMinkowski(m_triangles[i], *tmpTriangle);
+
+				if (hit == false)
+					continue;
+
+				minkowskiHit = true;
+				//m_triangles[i].isHit(hit);
+				//*** mk
+			}
+
+			if(sbvHit)
+				m_window->draw(m_triangles[i].getSBVShape());
+
+			if(aabbHit)
+				m_window->draw(m_triangles[i].getAABBShape());
+
+			if(obbHit)
+				m_window->draw(m_triangles[i].getOBBShape());
+
+			m_triangles[i].isHit(minkowskiHit);
 			m_window->draw(m_triangles[i]);
-			m_triangles[i].isHit(false);
-
-			sf::Vector2f triPos = m_triangles[i].getPosition();
-			sf::Vector2f triCentroid = m_triangles[i].getCentroid();
-
-			/*centerCircle.setPosition(triPos);
-			m_window->draw(centerCircle);*/
-
-			//SBV
-			bool hit;
-
-			hit = CollideSBV(m_triangles[i], mouseTriangle);
-			//hit = true;
-
-			if (hit == false)
-				continue;
-
-			m_window->draw(m_triangles[i].getSBVShape());
-			//*** sbv
-
-			//AABB
-			hit = CollideAABB(m_triangles[i], mouseTriangle);
-			//hit = true;
-
-			if (hit == false)
-				continue;
-
-			m_window->draw(m_triangles[i].getAABBShape());
-			//*** aabb
-
-			//OBB
-			hit = CollideOBB(m_triangles[i], mouseTriangle);
-
-			if (hit == false)
-				continue;
-
-			m_window->draw(m_triangles[i].getOBBShape());
-			//*** obb
-
-			//minkowski
-			hit = CollideMinkowski(m_triangles[i], mouseTriangle);
-			m_triangles[i].isHit(hit);
-			//*** mk
 		}
 
 		/*centerCircle.setPosition(0, 0);
@@ -340,7 +366,7 @@ void CollisionDetection::setRenderWindow(sf::RenderWindow * wndw)
 	m_window = wndw;
 }
 
-bool CollisionDetection::CollideSBV(CollisionTriangle first, CollisionTriangle second)
+bool CollisionDetection::CollideSBV(CollisionTriangle& first, CollisionTriangle& second)
 {
 	sf::CircleShape& firstSBV = first.getSBVShape();
 	sf::CircleShape& secondSBV = second.getSBVShape();
@@ -353,7 +379,7 @@ bool CollisionDetection::CollideSBV(CollisionTriangle first, CollisionTriangle s
 		return true;
 }
 
-bool CollisionDetection::CollideAABB(CollisionTriangle first, CollisionTriangle second)
+bool CollisionDetection::CollideAABB(CollisionTriangle& first, CollisionTriangle& second)
 {
 	if (first.getGlobalBounds().intersects(second.getGlobalBounds()))
 		return true;
@@ -361,7 +387,7 @@ bool CollisionDetection::CollideAABB(CollisionTriangle first, CollisionTriangle 
 		return false;
 }
 
-bool CollisionDetection::CollideOBB(CollisionTriangle first, CollisionTriangle second)
+bool CollisionDetection::CollideOBB(CollisionTriangle& first, CollisionTriangle& second)
 {
 	sf::RectangleShape firstOBB = first.getOBBShape();
 	sf::RectangleShape secondOBB = second.getOBBShape();
@@ -431,20 +457,22 @@ bool CollisionDetection::CollideOBB(CollisionTriangle first, CollisionTriangle s
 	return true;
 }
 
-bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTriangle second)
+bool CollisionDetection::CollideMinkowski(CollisionTriangle& first, CollisionTriangle& second)
 {
 	sf::Vector2f sum[9];
 
+	CollisionTriangle secondCopy = second;
+
 	//invert second
 	for(int i = 0; i < 3; ++i)
-		second.setPoint(i, second.getCentroid() - second.getPoint(i));
+		secondCopy.setPoint(i, secondCopy.getCentroid() - secondCopy.getPoint(i));
 
 	for (int i = 0; i < 3; ++i)
 	{
 		for (int j = 0; j < 3; ++j)
 		{
 			//sum[(i * 3) + j] = (first.getPosition() - first.getCentroid() + first.getPoint(i)) + (second.getPosition() - second.getCentroid() + second.getPoint(j));
-			sum[(i * 3) + j] = first.getPosition() - first.getCentroid() + first.getPoint(i) + second.getPoint(j);
+			sum[(i * 3) + j] = first.getPosition() - first.getCentroid() + first.getPoint(i) + secondCopy.getPoint(j);
 		}
 	}
 
@@ -463,7 +491,7 @@ bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTria
 		++cnt;
 	}
 
-	sf::Vector2f target = second.getPosition();
+	sf::Vector2f target = secondCopy.getPosition();
 	for (int i = 0; i < cnt; ++i)
 	{
 		float right;
@@ -479,7 +507,7 @@ bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTria
 	return true;
 }
 
-bool CollisionDetection::CollideForeal(CollisionTriangle first, CollisionTriangle second)
+bool CollisionDetection::CollideForeal(CollisionTriangle& first, CollisionTriangle& second)
 {
 	sf::Vector2f firstPoints[3] = { first.getPoint(0), first.getPoint(1), first.getPoint(2) };
 	sf::Vector2f secondPoints[3] = { second.getPoint(0), second.getPoint(1), second.getPoint(2) };
