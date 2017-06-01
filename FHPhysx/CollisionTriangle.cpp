@@ -38,11 +38,29 @@ void CollisionTriangle::setPosition(const sf::Vector2f& pos)
 	m_obb.setPosition(pos + m_obbOrigin - m_centroid);
 }
 
+void CollisionTriangle::scale(float s)
+{
+	ConvexShape::scale(s, s);
+
+	//SBV
+	sf::Vector2f longestSide = calcLongestSideAndCoords();
+	float sbvRadius = this->m_longestSide * 0.5f;
+	m_sbv.setRadius(sbvRadius);
+	m_sbv.setOrigin(sf::Vector2f(sbvRadius, sbvRadius) + m_centroid);
+	//*** sbv
+
+	//AABB
+	sf::FloatRect globalBounds = this->getGlobalBounds();
+	m_aabb.setSize(sf::Vector2f(globalBounds.width, globalBounds.height));
+	m_aabb.setPosition(sf::Vector2f(globalBounds.left, globalBounds.top));
+	//*** aabb
+}
+
 void CollisionTriangle::init(float size, int seed)
 {
 	std::random_device rng;
 	std::mt19937 urng(rng());
-	//urng.seed(0);
+	urng.seed(seed);
 	std::uniform_real_distribution<> zeroToOne(0, 1);
 	//random number between 0 and 1: zeroToOne(urng)
 

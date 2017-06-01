@@ -40,6 +40,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 	//setup scene
 	RNGesus rng;
+	rng.seed(420);
 	CollisionTriangle* m_triangles = new CollisionTriangle[numberOfTriangles];
 	float tmpX = 0, tmpY = 0, tmpFactor = 40.0f;
 	for (int i = 0; i < numberOfTriangles; ++i)
@@ -198,12 +199,12 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 		{
-			mouseTriangle.scale(1.1f, 1.1f);
+			mouseTriangle.scale(1.1f);
 			//mouseSBV.scale(1.1f, 1.1f);
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 		{
-			mouseTriangle.scale(0.9f, 0.9f);
+			mouseTriangle.scale(0.9f);
 			//mouseSBV.scale(0.9f, 0.9f);
 		}
 
@@ -287,39 +288,39 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			//SBV
 			bool hit;
 
-			hit = CollideSBV(m_triangles[i], mouseTriangle);
-			//hit = true;
+			//hit = CollideSBV(m_triangles[i], mouseTriangle);
+			////hit = true;
+
+			//if (hit == false)
+			//	continue;
+
+			//m_window->draw(m_triangles[i].getSBVShape());
+			////*** sbv
+
+			////AABB
+			//hit = CollideAABB(m_triangles[i], mouseTriangle);
+			////hit = true;
+
+			//if (hit == false)
+			//	continue;
+
+			//m_window->draw(m_triangles[i].getAABBShape());
+			////*** aabb
+
+			//OBB
+			hit = CollideOBB(m_triangles[i], mouseTriangle);
 
 			if (hit == false)
 				continue;
 
-			m_window->draw(m_triangles[i].getSBVShape());
-
-			/*centerCircle.setPosition(m_triangles[i].getSBVShape().getPosition());
-			m_window->draw(centerCircle);*/
-
-			//*** sbv
-
-			//AABB
-			hit = CollideAABB(m_triangles[i], mouseTriangle);
-			//hit = true;
-
-			if (hit == false)
-				continue;
-
-			m_window->draw(m_triangles[i].getAABBShape());
-
-			//*** aabb
+			m_window->draw(m_triangles[i].getOBBShape());
+			m_triangles[i].isHit(hit);
+			//*** obb
 
 			//minkowski
-			hit = CollideMinkowski(m_triangles[i], mouseTriangle);
-			m_triangles[i].isHit(hit);
+			/*hit = CollideMinkowski(m_triangles[i], mouseTriangle);
+			m_triangles[i].isHit(hit);*/
 			//*** mk
-
-			//real
-			//hit = CollideForeal(m_triangles[i], mouseTriangle);
-			//m_triangles[i].isHit(hit);
-			//*** real
 		}
 
 		/*centerCircle.setPosition(0, 0);
@@ -384,9 +385,11 @@ bool CollisionDetection::CollideOBB(CollisionTriangle first, CollisionTriangle s
 	sf::RectangleShape firstOBB = first.getOBBShape();
 	sf::RectangleShape secondOBB = second.getOBBShape();
 
-	sf::Vector2f projVector;
-
-	int cutCount = 0;
+	sf::Vector2f projVector,
+		firstPos = firstOBB.getPosition(),
+		secondPos = secondOBB.getPosition();
+	float firstRot = firstOBB.getRotation(),
+		secondRot = secondOBB.getRotation();
 
 	sf::RectangleShape debugLine;
 	debugLine.setSize(sf::Vector2f(100.f, 2.f));
@@ -396,30 +399,55 @@ bool CollisionDetection::CollideOBB(CollisionTriangle first, CollisionTriangle s
 	{
 		if (i == 0)
 		{
-			projVector = vectorMath::rotateD(firstOBB.getPoint(1) - firstOBB.getPoint(0), firstOBB.getRotation());
+			projVector = vectorMath::rotateD(firstOBB.getPoint(1) - firstOBB.getPoint(0), firstRot);
 		}
 		else if (i == 1)
 		{
-			projVector = vectorMath::rotateD(firstOBB.getPoint(3) - firstOBB.getPoint(0), firstOBB.getRotation());
+			projVector = vectorMath::rotateD(firstOBB.getPoint(3) - firstOBB.getPoint(0), firstRot);
 		}
 		else if (i == 2)
 		{
-			projVector = vectorMath::rotateD(secondOBB.getPoint(1) - secondOBB.getPoint(0), secondOBB.getRotation());
+			projVector = vectorMath::rotateD(secondOBB.getPoint(1) - secondOBB.getPoint(0), secondRot);
 		}
 		else if (i == 3)
 		{
-			projVector = vectorMath::rotateD(secondOBB.getPoint(3) - secondOBB.getPoint(0), secondOBB.getRotation());
+			projVector = vectorMath::rotateD(secondOBB.getPoint(3) - secondOBB.getPoint(0), secondRot);
 		}
 
 		projVector = vectorMath::normalize(projVector);
 
-		debugLine.setRotation(vectorMath::angleD(projVector));
-		m_window->draw(debugLine);
+		/*debugLine.setRotation(vectorMath::angleD(projVector));
+		m_window->draw(debugLine);*/
 
+		float firstMin, firstMax, secondMin, secondMax;
+		firstMin = secondMin = HUGE_VALF;
+		firstMax = secondMax = -HUGE_VALF;
 
+		for (int i = 0; i < 4; ++i)
+		{
+			float tmp = vectorMath::dot(firstPos + vectorMath::rotateD(firstOBB.getPoint(i), firstRot), projVector);
+			if (tmp < firstMin)
+				firstMin = tmp;
+
+			if (tmp > firstMax)
+				firstMax = tmp;
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			float tmp = vectorMath::dot(secondPos + vectorMath::rotateD(secondOBB.getPoint(i), secondRot), projVector);
+			if (tmp < secondMin)
+				secondMin = tmp;
+
+			if (tmp > secondMax)
+				secondMax = tmp;
+		}
+
+		if (firstMax < secondMin || secondMax < firstMin)
+			return false;
 	}
 
-	return false;
+	return true;
 }
 
 bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTriangle second)

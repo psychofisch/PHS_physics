@@ -81,8 +81,8 @@ void main(int argc, const char* argv[])
 		cd.setDebugMode(true);
 		cd.physxTick = 0.016f;
 		cd.setRenderWindow(&window);
-		cd.StartDemo(324, sf::Vector2i(500, 500));
-		//cd.StartDemo(100, sf::Vector2i(500, 500));
+		//cd.StartDemo(324, sf::Vector2i(500, 500));
+		cd.StartDemo(100, sf::Vector2i(500, 500));
 	}
 
 	window.close();

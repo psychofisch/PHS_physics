@@ -21,6 +21,7 @@ public:
 
 	void setPosition(const float posX, const float posY);
 	void setPosition(const sf::Vector2f& pos);
+	void scale(float s);
 
 	void init(float size, int seed);
 	sf::Vector2f getCentroid() const;
