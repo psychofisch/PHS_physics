@@ -1,0 +1,1 @@
+FHPhysx.exe --mode collision --triangles 1000 --gap 30

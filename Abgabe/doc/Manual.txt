@@ -1,0 +1,16 @@
+FHPhysx
+--------
+
+parameters
+----------
+all parameters start with "--".
+
+debug			- activates debugmode
+mode <string>	- "moon" or "collision" (default: "collision")
+triangles <int>	- number of triangles in the CollisionDetection-Demo
+gap <float>		- size of the gap between the triangles
+
+Author
+-----
+Thomas Fischer
+gs16m022
