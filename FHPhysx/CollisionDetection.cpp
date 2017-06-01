@@ -267,45 +267,27 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 			/*centerCircle.setPosition(triPos);
 			m_window->draw(centerCircle);*/
 
-			/*centerCircle.setPosition(m_triangles[i].getLongestSideCenter());
-			m_window->draw(centerCircle);*/
-
-			//m_window->draw(m_triangles[i].getOBBShape());
-			//CollideOBB(m_triangles[i], mouseTriangle);
-
-			/*centerCircle.setFillColor(sf::Color::Red);
-			centerCircle.setPosition(triPos - triCentroid + m_triangles[i].getPoint(0));
-			m_window->draw(centerCircle);
-
-			centerCircle.setFillColor(sf::Color::Green);
-			centerCircle.setPosition(triPos - triCentroid + m_triangles[i].getPoint(1));
-			m_window->draw(centerCircle);
-
-			centerCircle.setFillColor(sf::Color::Blue);
-			centerCircle.setPosition(triPos - triCentroid + m_triangles[i].getPoint(2));
-			m_window->draw(centerCircle);*/
-
 			//SBV
 			bool hit;
 
-			//hit = CollideSBV(m_triangles[i], mouseTriangle);
-			////hit = true;
+			hit = CollideSBV(m_triangles[i], mouseTriangle);
+			//hit = true;
 
-			//if (hit == false)
-			//	continue;
+			if (hit == false)
+				continue;
 
-			//m_window->draw(m_triangles[i].getSBVShape());
-			////*** sbv
+			m_window->draw(m_triangles[i].getSBVShape());
+			//*** sbv
 
-			////AABB
-			//hit = CollideAABB(m_triangles[i], mouseTriangle);
-			////hit = true;
+			//AABB
+			hit = CollideAABB(m_triangles[i], mouseTriangle);
+			//hit = true;
 
-			//if (hit == false)
-			//	continue;
+			if (hit == false)
+				continue;
 
-			//m_window->draw(m_triangles[i].getAABBShape());
-			////*** aabb
+			m_window->draw(m_triangles[i].getAABBShape());
+			//*** aabb
 
 			//OBB
 			hit = CollideOBB(m_triangles[i], mouseTriangle);
@@ -314,12 +296,11 @@ void CollisionDetection::StartDemo(int numberOfTriangles, sf::Vector2i worldSize
 				continue;
 
 			m_window->draw(m_triangles[i].getOBBShape());
-			m_triangles[i].isHit(hit);
 			//*** obb
 
 			//minkowski
-			/*hit = CollideMinkowski(m_triangles[i], mouseTriangle);
-			m_triangles[i].isHit(hit);*/
+			hit = CollideMinkowski(m_triangles[i], mouseTriangle);
+			m_triangles[i].isHit(hit);
 			//*** mk
 		}
 
