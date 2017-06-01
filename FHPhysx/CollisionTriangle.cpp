@@ -42,7 +42,7 @@ void CollisionTriangle::init(float size, int seed)
 {
 	std::random_device rng;
 	std::mt19937 urng(rng());
-	urng.seed(0);
+	//urng.seed(0);
 	std::uniform_real_distribution<> zeroToOne(0, 1);
 	//random number between 0 and 1: zeroToOne(urng)
 

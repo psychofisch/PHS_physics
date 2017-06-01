@@ -450,8 +450,8 @@ bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTria
 	{
 		for (int j = 0; j < 3; ++j)
 		{
-			sum[(i * 3) + j] = (first.getPosition() - first.getCentroid() + first.getPoint(i)) + (second.getPosition() - second.getCentroid() + second.getPoint(j));
-			//sum[(i * 3) + j] = first.getPoint(i) + second.getPoint(j);
+			//sum[(i * 3) + j] = (first.getPosition() - first.getCentroid() + first.getPoint(i)) + (second.getPosition() - second.getCentroid() + second.getPoint(j));
+			sum[(i * 3) + j] = first.getPosition() - first.getCentroid() + first.getPoint(i) + second.getPoint(j);
 			outPoints[(i * 3) + j] = sum[(i * 3) + j];
 		}
 	}
@@ -475,9 +475,14 @@ bool CollisionDetection::CollideMinkowski(CollisionTriangle first, CollisionTria
 	}
 	*outCount = cnt;
 
-	for (int i = 0; i < cnt - 1; ++i)
+	sf::Vector2f target = second.getPosition();
+	for (int i = 0; i < cnt; ++i)
 	{
-		float right = vectorMath::sign(sf::Vector2f(0, 0), outPoints[i], outPoints[i + 1]);
+		float right;
+		if(i < cnt - 1)
+			right = vectorMath::sign(target, outPoints[i], outPoints[i + 1]);
+		else
+			right = vectorMath::sign(target, outPoints[i], outPoints[0]);
 
 		if (right < 0.0f)
 			return false;
