@@ -13,6 +13,11 @@ Hull::Hull(const sf::Vector2f& copy) : sf::Vector2f(copy), Previous(this), Next(
 
 Hull::~Hull()
 {
+	//delete Previous;
+	//Previous = nullptr;
+
+	//delete Next;
+	//Next = nullptr;
 }
 
 Hull* Hull::InsertNext(const sf::Vector2f& point)

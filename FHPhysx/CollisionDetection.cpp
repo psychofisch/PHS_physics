@@ -43,7 +43,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 
 	//setup scene
 	RNGesus rng;
-	rng.seed(420);
+	rng.seed(1337);
 	CollisionTriangle* m_triangles = new CollisionTriangle[numberOfTriangles];
 	float tmpX = 0, tmpY = 0;
 	int nextRow = int(sqrtf(float(numberOfTriangles)));
@@ -261,6 +261,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 		m_window->draw(mouseTriangle.getAABBShape());
 		m_window->draw(mouseTriangle.getOBBShape());
 
+#pragma omp parallel for
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
 			bool sbvHit, aabbHit, obbHit, minkowskiHit;
@@ -322,17 +323,20 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 				//*** mk
 			}
 
-			if(sbvHit)
-				m_window->draw(m_triangles[i].getSBVShape());
+#pragma omp critical
+			{
+				if (sbvHit)
+					m_window->draw(m_triangles[i].getSBVShape());
 
-			if(aabbHit)
-				m_window->draw(m_triangles[i].getAABBShape());
+				if (aabbHit)
+					m_window->draw(m_triangles[i].getAABBShape());
 
-			if(obbHit)
-				m_window->draw(m_triangles[i].getOBBShape());
+				if (obbHit)
+					m_window->draw(m_triangles[i].getOBBShape());
 
-			m_triangles[i].isHit(minkowskiHit);
-			m_window->draw(m_triangles[i]);
+				m_triangles[i].isHit(minkowskiHit);
+				m_window->draw(m_triangles[i]);
+			}
 		}
 
 		/*centerCircle.setPosition(0, 0);
@@ -402,7 +406,7 @@ bool CollisionDetection::CollideOBB(CollisionTriangle& first, CollisionTriangle&
 		secondRot = secondOBB.getRotation();
 
 	sf::RectangleShape debugLine;
-	debugLine.setSize(sf::Vector2f(100.f, 2.f));
+	debugLine.setSize(sf::Vector2f(100.f, 1.f));
 
 	//projection axis
 	for (int i = 0; i < 4; ++i)
@@ -427,6 +431,10 @@ bool CollisionDetection::CollideOBB(CollisionTriangle& first, CollisionTriangle&
 		projVector = vectorMath::normalize(projVector);
 
 		/*debugLine.setRotation(vectorMath::angleD(projVector));
+		if(i < 2)
+			debugLine.setPosition(firstPos);
+		else
+			debugLine.setPosition(secondPos);
 		m_window->draw(debugLine);*/
 
 		float firstMin, firstMax, secondMin, secondMax;
