@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "Space2D.h"
+#include "Particle2D.h"
 #include "CollisionDetection.h"
 
 enum MODE { MODE_MOONLANDER = 0, MODE_COLLISION };
@@ -19,7 +19,7 @@ void main(int argc, const char* argv[])
 		if (strcmp(argv[i], "--mode") == 0)
 		{
 			++i;
-			if (strcmp(argv[i], "moon") == 0)
+			if (strcmp(argv[i], "particle") == 0)
 				mode = MODE_MOONLANDER;
 			else if (strcmp(argv[i], "collision") == 0)
 				mode =	MODE_COLLISION;
@@ -66,7 +66,7 @@ void main(int argc, const char* argv[])
 	{
 		std::cout << "Moonlander started...\n";
 
-		Space2D spaaace;
+		Particle2D spaaace;
 		spaaace.physxTick = .016f;
 
 		spaaace.setRenderWindow(&window);

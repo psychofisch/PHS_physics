@@ -5,11 +5,11 @@
 #include <SFML/Graphics.hpp>
 
 
-class Space2D
+class Particle2D
 {
 public:
-	Space2D();
-	~Space2D();
+	Particle2D();
+	~Particle2D();
 
 	void Run();
 	void setDebugMode(bool d);

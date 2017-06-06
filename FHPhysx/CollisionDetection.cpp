@@ -21,7 +21,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 	m_uiView.setCenter(windowCenter);
 	m_uiView.setSize(windowCenter * 2.0f);
 
-	sf::Clock time;
+	sf::Clock clock;
 	float dt = 0.16f;
 	//float tickRun = tick;
 	int currentTile = -1;
@@ -94,7 +94,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 	bool quit = false;
 	while (!quit)
 	{
-		time.restart();
+		clock.restart();
 
 		sf::Vector2i mousePos = sf::Mouse::getPosition(*m_window);
 		sf::Vector2f mousePos_mapped = m_window->mapPixelToCoords(mousePos, m_view);
@@ -146,6 +146,9 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 					break;
 				case sf::Keyboard::N:
 					//m_step = true;
+					mouseTriangle = CollisionTriangle();
+					mouseTriangle.init(200.0f, time(NULL));
+					mouseTriangle.setFillColor(sf::Color(237, 179, 0));
 					break;
 				case sf::Keyboard::P:
 					pause = !pause;
@@ -261,13 +264,13 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 		m_window->draw(mouseTriangle.getAABBShape());
 		m_window->draw(mouseTriangle.getOBBShape());
 
-#pragma omp parallel for
 		for (int i = 0; i < numberOfTriangles; ++i)
 		{
 			bool sbvHit, aabbHit, obbHit, minkowskiHit;
 			sbvHit = aabbHit = obbHit = minkowskiHit = false;
 
-			for (int j = -1; j < numberOfTriangles; ++j)
+#pragma omp parallel for
+			for (int j = -1; j < 0; ++j)
 			{
 				if (i == j)
 					continue;
@@ -323,20 +326,17 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 				//*** mk
 			}
 
-#pragma omp critical
-			{
-				if (sbvHit)
-					m_window->draw(m_triangles[i].getSBVShape());
+			if (sbvHit)
+				m_window->draw(m_triangles[i].getSBVShape());
 
-				if (aabbHit)
-					m_window->draw(m_triangles[i].getAABBShape());
+			if (aabbHit)
+				m_window->draw(m_triangles[i].getAABBShape());
 
-				if (obbHit)
-					m_window->draw(m_triangles[i].getOBBShape());
+			if (obbHit)
+				m_window->draw(m_triangles[i].getOBBShape());
 
-				m_triangles[i].isHit(minkowskiHit);
-				m_window->draw(m_triangles[i]);
-			}
+			m_triangles[i].isHit(minkowskiHit);
+			m_window->draw(m_triangles[i]);
 		}
 
 		/*centerCircle.setPosition(0, 0);
@@ -357,7 +357,7 @@ void CollisionDetection::StartDemo(int numberOfTriangles, float gap)
 		m_window->display();
 		//*** render
 
-		dt = time.getElapsedTime().asSeconds();
+		dt = clock.getElapsedTime().asSeconds();
 	}
 
 	delete[] outPoints;
