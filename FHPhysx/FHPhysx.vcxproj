@@ -129,6 +129,7 @@
     <ClCompile Include="HullPoint.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Particle2D.cpp" />
+    <ClCompile Include="PhysBall.cpp" />
     <ClCompile Include="vector2math.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +137,7 @@
     <ClInclude Include="CollisionTriangle.h" />
     <ClInclude Include="Hull.h" />
     <ClInclude Include="HullPoint.h" />
+    <ClInclude Include="PhysBall.h" />
     <ClInclude Include="RNGesus.h" />
     <ClInclude Include="Particle2D.h" />
     <ClInclude Include="vector2math.h" />

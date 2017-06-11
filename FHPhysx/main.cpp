@@ -60,22 +60,22 @@ void main(int argc, const char* argv[])
 	settings.antialiasingLevel = 2;
 
 	sf::RenderWindow window(vm, "PHS Project", sf::Style::Titlebar | sf::Style::Close | sf::Style::Default, settings);
-	//window.setFramerateLimit(144);
+	window.setFramerateLimit(144);
 
 	if (mode == MODE_MOONLANDER)
 	{
-		std::cout << "Moonlander started...\n";
+		std::cout << "Particle2D started...\n";
 
-		Particle2D spaaace;
-		spaaace.physxTick = .016f;
+		Particle2D particle;
+		particle.physxTick = .016f;
 
-		spaaace.setRenderWindow(&window);
-		spaaace.setWorldDimensions(300, 1000);
+		particle.setRenderWindow(&window);
+		particle.setWorldDimensions(300, 1000);
 		/*spaaace.setNumberOfThreads(threads);
 		spaaace.setMutlithreadingMode(mode);
 		spaaace.setOpenCLPlatformAndDevice(platformId, deviceId);*/
-		spaaace.setDebugMode(debug);
-		spaaace.Run();
+		particle.setDebugMode(debug);
+		particle.Run();
 	}
 	else if (mode == MODE_COLLISION)
 	{
