@@ -41,12 +41,28 @@ void Particle2D::Run()
 
 	unsigned int fps = 0, fpsCount = 0;
 	float fpsTimer = 0.f;
-	sf::Vector2f gravity(0.f, 9.81f);
+	GameVec gravity(0.f, 9.81f);
+	GameVec fanForce(-10.0f, 0.f);
+	fanForce.active = false;
 
 	PhysBall testBall;
-	testBall.setFillColor(sf::Color::Green);
+	testBall.setFillColor(COLOR_0);
 	testBall.setRadius(10.0f);
 	testBall.setPosition(420.f, 100.f);
+
+	sf::RectangleShape physFloor;
+	physFloor.setFillColor(COLOR_1);
+	physFloor.setPosition(0.f, 750.f);
+	physFloor.setSize(sf::Vector2f(1500.0f, 100.0f));
+	//physFloor.rotate(10.0f);
+
+	ForceGenerator forceGen;
+	forceGen.addForce(&gravity);
+	forceGen.addForce(&fanForce);
+	forceGen.addPhysBall(&testBall);
+
+	forceGen.addCollider(&physFloor);
+
 
 	bool quit = false;
 	while (!quit)
@@ -67,6 +83,7 @@ void Particle2D::Run()
 			}
 			else if (eve.type == sf::Event::MouseButtonPressed && eve.mouseButton.button == sf::Mouse::Left)
 			{
+				testBall.setPosition(mousePos_mapped);
 				break;
 			}
 			else if (eve.type == sf::Event::MouseButtonPressed && eve.mouseButton.button == sf::Mouse::Right)
@@ -103,8 +120,10 @@ void Particle2D::Run()
 				case sf::Keyboard::Dash:
 					break;
 				case sf::Keyboard::Q:
+					fanForce.active = false;
 					break;
 				case sf::Keyboard::E:
+					fanForce.active = true;
 					break;
 				case sf::Keyboard::U:
 					break;
@@ -166,8 +185,9 @@ void Particle2D::Run()
 
 		//updates
 
-		testBall.addImpulse(gravity * dt);
-		testBall.update();
+		//testBall.addImpulse(gravity * dt);
+		forceGen.update(dt);
+		testBall.update(dt);
 
 		//tickRun -= dt;
 		//if (tickRun <= 0.f)
@@ -207,6 +227,7 @@ void Particle2D::Run()
 		m_window->setView(m_view);
 
 		m_window->draw(testBall);
+		m_window->draw(physFloor);
 
 		//ui stuff
 		m_window->setView(m_uiView);

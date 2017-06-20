@@ -6,6 +6,14 @@
 #include <SFML/Graphics.hpp>
 
 #include "PhysBall.h"
+#include "ForceGenerator.h"
+#include "GameVec.h"
+
+#define COLOR_0 sf::Color(78, 253, 255)
+#define COLOR_1 sf::Color(37, 131, 232)
+#define COLOR_2 sf::Color(57, 53, 255)
+#define COLOR_3 sf::Color(142, 37, 232)
+#define COLOR_4 sf::Color(255, 51, 233)
 
 class Particle2D
 {

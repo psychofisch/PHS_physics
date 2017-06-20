@@ -10,11 +10,13 @@ public:
 	PhysBall();
 	~PhysBall();
 
-	void update();
+	void update(float dt);
 	sf::Vector2f getVelocity();
 	void addImpulse(sf::Vector2f acceleration);
 
-private:
+	float mass;
+
+//private:
 	sf::Vector2f m_velocity;
 };
 
