@@ -42,6 +42,8 @@ void Particle2D::Run()
 	unsigned int fps = 0, fpsCount = 0;
 	float fpsTimer = 0.f;
 	GameVec gravity(0.f, 9.81f);
+	gravity.active = true;
+
 	GameVec fanForce(-10.0f, 0.f);
 	fanForce.active = false;
 
@@ -54,7 +56,7 @@ void Particle2D::Run()
 	physFloor.setFillColor(COLOR_1);
 	physFloor.setPosition(0.f, 750.f);
 	physFloor.setSize(sf::Vector2f(1500.0f, 100.0f));
-	//physFloor.rotate(10.0f);
+	physFloor.rotate(10.0f);
 
 	ForceGenerator forceGen;
 	forceGen.addForce(&gravity);
@@ -63,6 +65,14 @@ void Particle2D::Run()
 
 	forceGen.addCollider(&physFloor);
 
+	sf::CircleShape particle;
+	particle.setFillColor(COLOR_2);
+	particle.setRadius(5.f);
+
+	ParticleSystem testSystem(1000);
+	testSystem.forcesFromForceGen(forceGen);
+	testSystem.setPosition(sf::Vector2f(400.f, 400.f));
+	testSystem.setParticleShape(&particle);
 
 	bool quit = false;
 	while (!quit)
@@ -83,6 +93,7 @@ void Particle2D::Run()
 			}
 			else if (eve.type == sf::Event::MouseButtonPressed && eve.mouseButton.button == sf::Mouse::Left)
 			{
+				testBall.m_velocity = sf::Vector2f();
 				testBall.setPosition(mousePos_mapped);
 				break;
 			}
@@ -188,6 +199,7 @@ void Particle2D::Run()
 		//testBall.addImpulse(gravity * dt);
 		forceGen.update(dt);
 		testBall.update(dt);
+		testSystem.update(dt);
 
 		//tickRun -= dt;
 		//if (tickRun <= 0.f)
@@ -222,12 +234,13 @@ void Particle2D::Run()
 		//*** updates
 
 		//render
-		m_window->clear(sf::Color(69, 69, 69));
+		m_window->clear(sf::Color(30, 30, 30));
 
 		m_window->setView(m_view);
 
-		m_window->draw(testBall);
 		m_window->draw(physFloor);
+		testSystem.drawParticles(m_window);
+		m_window->draw(testBall);
 
 		//ui stuff
 		m_window->setView(m_uiView);

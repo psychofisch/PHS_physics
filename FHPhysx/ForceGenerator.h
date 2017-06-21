@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "PhysBall.h"
 #include "GameVec.h"
 
@@ -18,6 +20,7 @@ public:
 	void addPhysBall(PhysBall* ph);
 	void addForce(GameVec* f);
 	void addCollider(sf::RectangleShape* rs);
+	size_t getForces(GameVec**& ptr);
 	void removeForce(GameVec* f);
 	void update(float dt);
 

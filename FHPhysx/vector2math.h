@@ -16,6 +16,10 @@ namespace sf {
 			:p1(a),
 			p2(b)
 		{}
+
+		Vector2fLines()
+			:Vector2fLines(sf::Vector2f(), sf::Vector2f())
+		{}
 	};
 }
 

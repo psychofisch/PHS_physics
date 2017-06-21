@@ -12,6 +12,6 @@ GameVec::GameVec(float x, float y)
 
 GameVec::GameVec(sf::Vector2f v)
 	: sf::Vector2f(v),
-	active(true)
+	active(false)
 {
 }

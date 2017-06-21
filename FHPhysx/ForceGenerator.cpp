@@ -33,6 +33,12 @@ void ForceGenerator::addCollider(sf::RectangleShape * rs)
 	m_collider[m_colliderCount++] = rs;
 }
 
+size_t ForceGenerator::getForces(GameVec ** & ptr)
+{
+	ptr = m_forces;
+	return m_forceCount;
+}
+
 void ForceGenerator::removeForce(GameVec * f)
 {
 	for (size_t j = 0; j < m_forceCount; ++j)
@@ -61,32 +67,49 @@ void ForceGenerator::update(float dt)
 			}
 		}
 
-		if (collision == -1)
-		{
-			size_t forceCount = 0;
-			for (size_t j = 0; j < m_forceCount; ++j)
-				if (m_forces[j]->active == true)
-				{
-					force += *m_forces[j];
-					forceCount++;
-				}
-			force /= float(forceCount);
-		}
-		else
+		
+		size_t forceCount = 0;
+		for (size_t j = 0; j < m_forceCount; ++j)
+			if (m_forces[j]->active == true)
+			{
+				force += *m_forces[j];
+				forceCount++;
+			}
+
+		force /= ((forceCount > 0)? float(forceCount) : 1.0f);
+
+		if (collision != -1)
 		{
 			sf::RectangleShape& collider = *(m_collider[collision]);
-			sf::Vector2fLines l1(m_physBalls[i]->getPosition(), collider.getPosition()),
-				l2(l1.p2 + collider.getPoint(0), l1.p2 + collider.getPoint(1));
+			sf::Vector2f colliderPos = collider.getPosition();
+			float colliderRot = collider.getRotation();
+			sf::Vector2fLines l1(m_physBalls[i]->getPosition(), colliderPos + vectorMath::rotateD((0.5f * collider.getSize()), colliderRot)),
+				l2;
 
-			sf::Vector2f intersection = vectorMath::lineIntersection(l1, l2);
+			sf::Vector2f intersection;
+			
+			int collisionIndex = -1;
+			for (int p = 0; p < 4; ++p)
+			{
+				l2.p1 = colliderPos + vectorMath::rotateD(collider.getPoint(p), colliderRot);
 
-			if (vectorMath::magnitude(intersection) < 0.001)
-				continue;
+				if(p < 3)
+					l2.p2 = colliderPos + vectorMath::rotateD(collider.getPoint(p + 1), colliderRot);
+				else
+					l2.p2 = colliderPos + vectorMath::rotateD(collider.getPoint(0), colliderRot);
 
+				intersection = vectorMath::lineIntersection(l1, l2);
+				
+				if (vectorMath::magnitude(l1.p1 - intersection) < 100.0f)
+				{
+					collisionIndex = p;
+					break;
+				}
+			}
 
-
+			if(collisionIndex >= 0)
 			//force = m_physBalls[i]->getPosition() - m_collider[collision]->getPosition();
-			force = -1.9f * m_physBalls[i]->getVelocity() / dt;
+				force = -1.9f * m_physBalls[i]->getVelocity() / dt;
 		}
 
 		m_physBalls[i]->addImpulse(force * dt);
