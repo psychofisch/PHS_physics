@@ -52,7 +52,7 @@ void main(int argc, const char* argv[])
 	}
 
 	sf::VideoMode vm;
-	vm.width = 720;
+	vm.width = 1280;
 	vm.height = 720;
 	vm.bitsPerPixel = 32;
 

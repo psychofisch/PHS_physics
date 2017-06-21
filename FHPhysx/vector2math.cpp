@@ -3,15 +3,18 @@
 
 sf::Vector2f vectorMath::normalize(const sf::Vector2f& source)
 {
-	float length = 1.0f / magnitude(source);
-	if (length != 0)
-		return sf::Vector2f(source.x * length, source.y * length);
+	float length = magnitude(source);
+	float inverseL = 1.f / length;
+	if (length > 0.f && inverseL != 0.f)
+		return sf::Vector2f(source.x * inverseL, source.y * inverseL);
 	else
 		return source;
 }
 
 float vectorMath::magnitude(const sf::Vector2f& source) 
 {
+	if (source.x == 0.f && source.y == 0.f)
+		return 0.f;
 	return sqrtf((source.x * source.x) + (source.y * source.y));
 }
 

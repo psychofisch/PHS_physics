@@ -67,7 +67,6 @@ void ForceGenerator::update(float dt)
 			}
 		}
 
-		
 		size_t forceCount = 0;
 		for (size_t j = 0; j < m_forceCount; ++j)
 			if (m_forces[j]->active == true)
@@ -81,9 +80,10 @@ void ForceGenerator::update(float dt)
 		if (collision != -1)
 		{
 			sf::RectangleShape& collider = *(m_collider[collision]);
+			collider.setFillColor(sf::Color::Red);
 			sf::Vector2f colliderPos = collider.getPosition();
 			float colliderRot = collider.getRotation();
-			sf::Vector2fLines l1(m_physBalls[i]->getPosition(), colliderPos + vectorMath::rotateD((0.5f * collider.getSize()), colliderRot)),
+			sf::Vector2fLines l1(m_physBalls[i]->getPosition(), m_physBalls[i]->getPosition() + m_physBalls[i]->m_velocity),
 				l2;
 
 			sf::Vector2f intersection;
@@ -100,16 +100,23 @@ void ForceGenerator::update(float dt)
 
 				intersection = vectorMath::lineIntersection(l1, l2);
 				
-				if (vectorMath::magnitude(l1.p1 - intersection) < 100.0f)
+				if (vectorMath::magnitude(l1.p1 - intersection) < 10.0f)
 				{
 					collisionIndex = p;
 					break;
 				}
 			}
 
-			if(collisionIndex >= 0)
-			//force = m_physBalls[i]->getPosition() - m_collider[collision]->getPosition();
-				force = -1.9f * m_physBalls[i]->getVelocity() / dt;
+			if (collisionIndex >= 0)
+			{
+				//force = m_physBalls[i]->getPosition() - m_collider[collision]->getPosition();
+				sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), -90.f);
+				//m_physBalls[i]->m_velocity = m_physBalls[i]->getVelocity() - 1.8f * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+				force = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - 1.8f * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+				force /= dt;
+				//force = -1.9f * m_physBalls[i]->getVelocity() / dt;
+				//m_physBalls[i]->setPosition(intersection);
+			}
 		}
 
 		m_physBalls[i]->addImpulse(force * dt);

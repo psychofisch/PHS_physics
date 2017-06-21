@@ -9,13 +9,13 @@ ParticleSystem::ParticleSystem(size_t numberOfParticles)
 	m_particleTTL(new float[numberOfParticles]),
 	m_lifetime(2.f),
 	m_activeParticles(0),
-	m_pps(100.f),
+	m_pps(1000.f),
 	m_tSinceLastSpawn(HUGE_VALF),
-	//m_forces(new GameVec*[128]),
-	m_angularVelocity(420.f),
-	m_rotationMode(ROTATION_LEFT),
-	m_spawnVelocity(5.f),
-	m_forceCount(0)
+	m_angularVelocity(420.f * 2.f),
+	m_rotationMode(ROTATION_RIGHT),
+	m_spawnVelocity(2.f),
+	m_forceCount(0),
+	m_active(true)
 {
 }
 
@@ -24,7 +24,6 @@ ParticleSystem::~ParticleSystem()
 	delete[] m_particlePos;
 	delete[] m_particleVel;
 	delete[] m_particleTTL;
-	//delete[] m_forces;
 }
 
 void ParticleSystem::setParticleShape(sf::CircleShape * p)
@@ -77,8 +76,26 @@ void ParticleSystem::forcesFromForceGen(ForceGenerator & fg)
 	m_forceCount = fg.getForces(m_forces);
 }
 
+size_t ParticleSystem::getActiveParticles()
+{
+	return m_activeParticles;
+}
+
+void ParticleSystem::setActive(bool b)
+{
+	m_active = b;
+}
+
+bool ParticleSystem::isActive()
+{
+	return m_active;
+}
+
 void ParticleSystem::update(float dt)
 {
+	if (!m_active)
+		return;
+
 	//System Calculations
 	m_rotation += m_angularVelocity * dt;
 	if (m_rotation > 360.f)
@@ -104,6 +121,7 @@ void ParticleSystem::update(float dt)
 	else
 		m_tSinceLastSpawn += dt;
 
+	m_activeParticles = 0;
 	for (size_t i = 0; i < m_numberOfParticles; ++i)
 	{
 		if (m_particlePos[i].active)
@@ -115,6 +133,8 @@ void ParticleSystem::update(float dt)
 				continue;
 			}
 
+			m_activeParticles++;
+
 			sf::Vector2f force;
 			size_t forceCount = 0;
 			for (size_t j = 0; j < m_forceCount; ++j)
@@ -125,6 +145,9 @@ void ParticleSystem::update(float dt)
 				}
 
 			force /= ((forceCount > 0) ? float(forceCount) : 1.0f);
+
+			sf::Vector2f dragForce = -vectorMath::normalize(m_particleVel[i])*(1.f * vectorMath::magnitude(m_particleVel[i]) + 1.f * powf(vectorMath::magnitude(m_particleVel[i]), 2));
+			force += dragForce;
 
 			m_particleVel[i] += force * dt;
 			m_particlePos[i] += m_particleVel[i];

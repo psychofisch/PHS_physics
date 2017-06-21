@@ -13,6 +13,8 @@ Particle2D::~Particle2D()
 
 void Particle2D::Run()
 {
+	m_view = m_window->getDefaultView();
+
 	sf::Clock clock;
 	float dt = 0.16f;
 
@@ -37,6 +39,10 @@ void Particle2D::Run()
 		pause = false;
 
 	std::stringstream debugString;
+
+	sf::RectangleShape debugRect;
+	debugRect.setFillColor(sf::Color::White);
+	debugRect.setSize(sf::Vector2f(100.f, 2.f));
 	//***d
 
 	unsigned int fps = 0, fpsCount = 0;
@@ -44,35 +50,56 @@ void Particle2D::Run()
 	GameVec gravity(0.f, 9.81f);
 	gravity.active = true;
 
-	GameVec fanForce(-10.0f, 0.f);
+	GameVec fanForce(-5.0f, 0.f);
 	fanForce.active = false;
 
+	float radius = 10.f;
 	PhysBall testBall;
 	testBall.setFillColor(COLOR_0);
-	testBall.setRadius(10.0f);
+	testBall.setRadius(radius);
 	testBall.setPosition(420.f, 100.f);
+	testBall.setOrigin(sf::Vector2f(radius * 0.5f, radius * 0.5f));
 
-	sf::RectangleShape physFloor;
-	physFloor.setFillColor(COLOR_1);
-	physFloor.setPosition(0.f, 750.f);
-	physFloor.setSize(sf::Vector2f(1500.0f, 100.0f));
-	physFloor.rotate(10.0f);
+	//Level
+	size_t objectsInLevel = 4;
+	sf::RectangleShape* levelObjects = new sf::RectangleShape[objectsInLevel];
+
+	levelObjects[0].setFillColor(COLOR_1);
+	levelObjects[0].setPosition(-100.f, 650.f);
+	levelObjects[0].setSize(sf::Vector2f(1480.0f, 150.f));
+
+	levelObjects[1].setFillColor(COLOR_1);
+	levelObjects[1].setPosition(-100.f, 400.f);
+	levelObjects[1].setSize(sf::Vector2f(400.f, 150.f));
+	levelObjects[1].setRotation(45.f);
+
+	levelObjects[2].setFillColor(COLOR_1);
+	levelObjects[2].setPosition(700.f, 350.f);
+	levelObjects[2].setSize(sf::Vector2f(250.f, 20.f));
+	levelObjects[2].setRotation(145.f);
+
+	levelObjects[3].setFillColor(COLOR_1);
+	levelObjects[3].setPosition(690.f, 330.f);
+	levelObjects[3].setSize(sf::Vector2f(250.f, 20.f));
+	levelObjects[3].setRotation(10.f);
 
 	ForceGenerator forceGen;
 	forceGen.addForce(&gravity);
 	forceGen.addForce(&fanForce);
 	forceGen.addPhysBall(&testBall);
 
-	forceGen.addCollider(&physFloor);
+	for(size_t i = 0; i < objectsInLevel; ++i)
+		forceGen.addCollider(&levelObjects[i]);
 
 	sf::CircleShape particle;
 	particle.setFillColor(COLOR_2);
-	particle.setRadius(5.f);
+	particle.setRadius(2.f);
 
 	ParticleSystem testSystem(1000);
 	testSystem.forcesFromForceGen(forceGen);
-	testSystem.setPosition(sf::Vector2f(400.f, 400.f));
+	testSystem.setPosition(sf::Vector2f(99.f, 77.f));
 	testSystem.setParticleShape(&particle);
+	testSystem.setActive(false);
 
 	bool quit = false;
 	while (!quit)
@@ -123,6 +150,9 @@ void Particle2D::Run()
 					break;
 				case sf::Keyboard::V:
 					break;
+				case sf::Keyboard::B:
+					testSystem.setActive(!testSystem.isActive());
+					break;
 				case sf::Keyboard::P:
 					pause = !pause;
 					break;
@@ -153,7 +183,7 @@ void Particle2D::Run()
 			{
 				m_view = sf::View(sf::FloatRect(0, 0, static_cast<float>(eve.size.width), static_cast<float>(eve.size.height)));
 				//sf::Vector2f view_center((m_grid[0].getPosition() + m_grid[m_grid.size() - 1].getPosition()) / 2.0f);
-				m_view.setCenter(sf::Vector2f(0, 0));
+				m_view.setCenter(m_view.getSize() * 0.5f);
 				windowCenter = sf::Vector2f(m_window->getSize());
 				windowCenter /= 2.0f;
 
@@ -197,6 +227,9 @@ void Particle2D::Run()
 		//updates
 
 		//testBall.addImpulse(gravity * dt);
+		//physFloor.setFillColor(COLOR_1);
+		for (size_t i = 0; i < objectsInLevel; ++i)
+			levelObjects[i].setFillColor(COLOR_1);
 		forceGen.update(dt);
 		testBall.update(dt);
 		testSystem.update(dt);
@@ -238,8 +271,14 @@ void Particle2D::Run()
 
 		m_window->setView(m_view);
 
-		m_window->draw(physFloor);
+		//m_window->draw(physFloor);
+		for (size_t i = 0; i < objectsInLevel; ++i)
+			m_window->draw(levelObjects[i]);
 		testSystem.drawParticles(m_window);
+
+		debugRect.setPosition(testBall.getPosition() + testBall.getOrigin());
+		debugRect.setRotation(vectorMath::angleD(testBall.m_velocity));
+		m_window->draw(debugRect);
 		m_window->draw(testBall);
 
 		//ui stuff
@@ -251,12 +290,13 @@ void Particle2D::Run()
 			debugString.str(std::string());//to clean string
 			debugString << fps << std::endl;
 			debugString << static_cast<int>(mousePos_mapped.x) << ":" << static_cast<int>(mousePos_mapped.y) << std::endl;
+			debugString << "Active Particles: " << testSystem.getActiveParticles() << std::endl;
 			debug_text.setString(debugString.str());
 			m_window->draw(debug_text);
 		}
 		//*** dt
 
-		//*** uis
+		//*** ui
 
 		m_window->display();
 		//*** render

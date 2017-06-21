@@ -23,11 +23,15 @@ public:
 	void setLifetime(float lt);
 	size_t getNumberOfParticles();
 	void forcesFromForceGen(ForceGenerator& fg);
+	size_t getActiveParticles();
+	void setActive(bool b);
+	bool isActive();
 
 	void update(float dt);
 	void drawParticles(sf::RenderWindow* w);
 
 private:
+	bool m_active;
 	sf::CircleShape* m_particleShape;
 	sf::Vector2f m_position;
 	GameVec* m_particlePos;
