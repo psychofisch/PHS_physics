@@ -8,7 +8,11 @@
 struct Force : public GameVec
 {
 	Force();
+	Force(float x, float y);
 	~Force();
+
+	enum TYPE { FORCE_GLOBAL = 0, FORCE_TUBE };
+	sf::Vector2f yLimit;
 };
 
 class ForceGenerator
@@ -18,15 +22,16 @@ public:
 	~ForceGenerator();
 
 	void addPhysBall(PhysBall* ph);
-	void addForce(GameVec* f);
+	void addForce(Force* f);
 	void addCollider(sf::RectangleShape* rs);
-	size_t getForces(GameVec**& ptr);
-	void removeForce(GameVec* f);
+	size_t getForces(Force**& ptr);
+	size_t getCollider(sf::RectangleShape**& ptr);
+	void removeForce(Force* f);
 	void update(float dt);
 
 private:
 	PhysBall** m_physBalls;
-	GameVec** m_forces;
+	Force** m_forces;
 	sf::RectangleShape** m_collider;
 	size_t m_physBallCount,
 		m_forceCount,

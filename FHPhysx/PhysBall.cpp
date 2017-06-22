@@ -4,7 +4,8 @@
 
 PhysBall::PhysBall()
 	:m_velocity(0.f, 0.f),
-	mass(1.0f)
+	mass(1.0f),
+	mode(MODE_FREEFALL)
 {
 	sf::CircleShape::setPointCount(8);
 }
@@ -29,5 +30,12 @@ sf::Vector2f PhysBall::getVelocity()
 
 void PhysBall::addImpulse(sf::Vector2f acceleration)
 {
-	m_velocity += acceleration;
+	m_velocity += acceleration/* / mass*/; //TODO: add mass -> not sure about this one 0o
+}
+
+void PhysBall::resetToPosition(sf::Vector2f pos)
+{
+	m_velocity.x = 0.f;
+	m_velocity.y = 0.f;
+	sf::CircleShape::setPosition(pos);
 }

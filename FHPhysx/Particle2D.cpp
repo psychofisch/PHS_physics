@@ -42,16 +42,19 @@ void Particle2D::Run()
 
 	sf::RectangleShape debugRect;
 	debugRect.setFillColor(sf::Color::White);
-	debugRect.setSize(sf::Vector2f(100.f, 2.f));
+	debugRect.setSize(sf::Vector2f(1.f, 1.f));
+	debugRect.setScale(sf::Vector2f(100.f, 2.f));
 	//***d
 
 	unsigned int fps = 0, fpsCount = 0;
 	float fpsTimer = 0.f;
-	GameVec gravity(0.f, 9.81f);
+	Force gravity(0.f, 9.81f);
 	gravity.active = true;
 
-	GameVec fanForce(-5.0f, 0.f);
+	Force fanForce(-50.0f, 0.f);
 	fanForce.active = false;
+	fanForce.yLimit.x = 200.f;
+	fanForce.yLimit.y = 400.f;
 
 	float radius = 10.f;
 	PhysBall testBall;
@@ -61,7 +64,7 @@ void Particle2D::Run()
 	testBall.setOrigin(sf::Vector2f(radius * 0.5f, radius * 0.5f));
 
 	//Level
-	size_t objectsInLevel = 4;
+	size_t objectsInLevel = 5;
 	sf::RectangleShape* levelObjects = new sf::RectangleShape[objectsInLevel];
 
 	levelObjects[0].setFillColor(COLOR_1);
@@ -83,6 +86,10 @@ void Particle2D::Run()
 	levelObjects[3].setSize(sf::Vector2f(250.f, 20.f));
 	levelObjects[3].setRotation(10.f);
 
+	levelObjects[4].setFillColor(COLOR_1);
+	levelObjects[4].setPosition(1200.f, 200.f);
+	levelObjects[4].setSize(sf::Vector2f(80.f, 200.f));
+
 	ForceGenerator forceGen;
 	forceGen.addForce(&gravity);
 	forceGen.addForce(&fanForce);
@@ -97,6 +104,7 @@ void Particle2D::Run()
 
 	ParticleSystem testSystem(1000);
 	testSystem.forcesFromForceGen(forceGen);
+	testSystem.objectsFromForceGen(forceGen);
 	testSystem.setPosition(sf::Vector2f(99.f, 77.f));
 	testSystem.setParticleShape(&particle);
 	testSystem.setActive(false);
@@ -120,12 +128,12 @@ void Particle2D::Run()
 			}
 			else if (eve.type == sf::Event::MouseButtonPressed && eve.mouseButton.button == sf::Mouse::Left)
 			{
-				testBall.m_velocity = sf::Vector2f();
-				testBall.setPosition(mousePos_mapped);
+				testBall.resetToPosition(mousePos_mapped);
 				break;
 			}
 			else if (eve.type == sf::Event::MouseButtonPressed && eve.mouseButton.button == sf::Mouse::Right)
 			{
+				testSystem.setPosition(mousePos_mapped);
 				break;
 			}
 			else if (eve.type == sf::Event::MouseWheelScrolled)
@@ -160,15 +168,51 @@ void Particle2D::Run()
 					break;
 				case sf::Keyboard::Dash:
 					break;
+				case sf::Keyboard::F:
+					fanForce.active = !fanForce.active;
+					break;
 				case sf::Keyboard::Q:
-					fanForce.active = false;
+					testBall.mass *= 0.9;
 					break;
 				case sf::Keyboard::E:
-					fanForce.active = true;
+					testBall.mass *= 1.1;
 					break;
 				case sf::Keyboard::U:
 					break;
 				case sf::Keyboard::T:
+				{
+					for (size_t c = 0; c < objectsInLevel; ++c)
+					{
+						sf::RectangleShape& collider = levelObjects[c];
+						sf::Vector2f colliderPos = collider.getPosition();
+						float colliderRot = collider.getRotation();
+
+						int inside = 0;
+						for (int p = 0; p < 4; ++p)
+						{
+							sf::Vector2f p1 = colliderPos + vectorMath::rotateD(collider.getPoint(p), colliderRot),
+								p2;
+
+							if (p < 3)
+								p2 = colliderPos + vectorMath::rotateD(collider.getPoint(p + 1), colliderRot);
+							else
+								p2 = colliderPos + vectorMath::rotateD(collider.getPoint(0), colliderRot);
+
+							float sign = vectorMath::sign(mousePos_mapped, p1, p2);
+
+							if (sign > 0.f)
+							{
+								inside++;
+							}
+						}
+
+						if (inside == 4)
+						{
+							std::cout << c << ": " << inside << std::endl;
+							collider.setFillColor(sf::Color::Green);
+						}
+					}
+				}
 					break;
 				case sf::Keyboard::Num1:
 					break;
@@ -276,8 +320,9 @@ void Particle2D::Run()
 			m_window->draw(levelObjects[i]);
 		testSystem.drawParticles(m_window);
 
+		debugRect.setScale(vectorMath::magnitude(testBall.getVelocity()) * 10.f, 2.f);
 		debugRect.setPosition(testBall.getPosition() + testBall.getOrigin());
-		debugRect.setRotation(vectorMath::angleD(testBall.m_velocity));
+		debugRect.setRotation(vectorMath::angleD(testBall.getVelocity()));
 		m_window->draw(debugRect);
 		m_window->draw(testBall);
 
@@ -291,6 +336,7 @@ void Particle2D::Run()
 			debugString << fps << std::endl;
 			debugString << static_cast<int>(mousePos_mapped.x) << ":" << static_cast<int>(mousePos_mapped.y) << std::endl;
 			debugString << "Active Particles: " << testSystem.getActiveParticles() << std::endl;
+			debugString << "testBall.mass: " << testBall.mass << std::endl;
 			debug_text.setString(debugString.str());
 			m_window->draw(debug_text);
 		}

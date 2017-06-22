@@ -21,8 +21,10 @@ public:
 	void setRotationMode(RotationMode rm);
 	void setSpawnSpeed(float pps);
 	void setLifetime(float lt);
+	void setParticleMass(float m);
 	size_t getNumberOfParticles();
 	void forcesFromForceGen(ForceGenerator& fg);
+	void objectsFromForceGen(ForceGenerator& fg);
 	size_t getActiveParticles();
 	void setActive(bool b);
 	bool isActive();
@@ -42,11 +44,14 @@ private:
 		m_angularVelocity,
 		m_pps,
 		m_tSinceLastSpawn,
-		m_lifetime;
+		m_lifetime,
+		m_particleMass;
 	RotationMode m_rotationMode;
 	size_t m_numberOfParticles,
 		m_activeParticles,
-		m_forceCount;
-	GameVec** m_forces;
+		m_forceCount,
+		m_colliderCount;
+	Force** m_forces;
+	sf::RectangleShape** m_collider;
 };
 

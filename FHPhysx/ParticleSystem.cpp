@@ -7,7 +7,7 @@ ParticleSystem::ParticleSystem(size_t numberOfParticles)
 	m_particlePos(new GameVec[numberOfParticles]),
 	m_particleVel(new sf::Vector2f[numberOfParticles]),
 	m_particleTTL(new float[numberOfParticles]),
-	m_lifetime(2.f),
+	m_lifetime(4.f),
 	m_activeParticles(0),
 	m_pps(1000.f),
 	m_tSinceLastSpawn(HUGE_VALF),
@@ -66,6 +66,11 @@ void ParticleSystem::setLifetime(float lt)
 	m_lifetime = lt;
 }
 
+void ParticleSystem::setParticleMass(float m)
+{
+	m_particleMass = m;
+}
+
 size_t ParticleSystem::getNumberOfParticles()
 {
 	return m_numberOfParticles;
@@ -74,6 +79,11 @@ size_t ParticleSystem::getNumberOfParticles()
 void ParticleSystem::forcesFromForceGen(ForceGenerator & fg)
 {
 	m_forceCount = fg.getForces(m_forces);
+}
+
+void ParticleSystem::objectsFromForceGen(ForceGenerator & fg)
+{
+	m_colliderCount = fg.getCollider(m_collider);
 }
 
 size_t ParticleSystem::getActiveParticles()
@@ -135,19 +145,60 @@ void ParticleSystem::update(float dt)
 
 			m_activeParticles++;
 
-			sf::Vector2f force;
-			size_t forceCount = 0;
-			for (size_t j = 0; j < m_forceCount; ++j)
-				if (m_forces[j]->active == true)
+			int collide = -1;
+
+			for (size_t c = 0; c < m_colliderCount; ++c)
+			{
+				sf::Vector2f colliderPos = m_collider[c]->getPosition();
+				float colliderRot = m_collider[c]->getRotation();
+				sf::RectangleShape& collider = *m_collider[c];
+
+				int inside = 0;
+				for (int p = 0; p < 4; ++p)
 				{
-					force += *m_forces[j];
-					forceCount++;
+					sf::Vector2f p1 = m_collider[c]->getPosition() + vectorMath::rotateD(collider.getPoint(p), colliderRot),
+						p2;
+
+					if (p < 3)
+						p2 = colliderPos + vectorMath::rotateD(collider.getPoint(p + 1), colliderRot);
+					else
+						p2 = colliderPos + vectorMath::rotateD(collider.getPoint(0), colliderRot);
+
+					float sign = vectorMath::sign(m_particlePos[i], p1, p2);
+
+					if (sign > 0.f)
+					{
+						inside++;
+					}
 				}
 
-			force /= ((forceCount > 0) ? float(forceCount) : 1.0f);
+				if (inside == 4)
+				{
+					collide = c;
+					break;
+				}
+			}
 
-			sf::Vector2f dragForce = -vectorMath::normalize(m_particleVel[i])*(1.f * vectorMath::magnitude(m_particleVel[i]) + 1.f * powf(vectorMath::magnitude(m_particleVel[i]), 2));
-			force += dragForce;
+			sf::Vector2f force;
+			if (collide == -1)
+			{
+				size_t forceCount = 0;
+				for (size_t j = 0; j < m_forceCount; ++j)
+					if (m_forces[j]->active == true && m_particlePos[i].y > m_forces[j]->yLimit.x &&  m_particlePos[i].y < m_forces[j]->yLimit.y)
+					{
+						force += *m_forces[j];
+						forceCount++;
+					}
+
+				//force /= ((forceCount > 0) ? float(forceCount) : 1.0f);
+
+				sf::Vector2f dragForce = -vectorMath::normalize(m_particleVel[i])*(1.f * vectorMath::magnitude(m_particleVel[i]) + 1.f * powf(vectorMath::magnitude(m_particleVel[i]), 2));
+				force += dragForce;
+			}
+			else
+			{
+				force = -m_particleVel[i] / dt;
+			}
 
 			m_particleVel[i] += force * dt;
 			m_particlePos[i] += m_particleVel[i];
