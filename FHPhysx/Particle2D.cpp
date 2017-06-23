@@ -103,15 +103,14 @@ void Particle2D::Run()
 	particle.setRadius(2.f);
 
 	ParticleSystem testSystem(1000, &forceGen);
-	//testSystem.forcesFromForceGen(forceGen);
-	//testSystem.objectsFromForceGen(forceGen);
 	testSystem.setPosition(sf::Vector2f(99.f, 77.f));
 	testSystem.setParticleShape(&particle);
 	testSystem.setActive(false);
 
-	PhysNet net(5, 5, 50.f, 10.f, &forceGen);
-	net.setPosition(sf::Vector2f(200.f, 5.f));
-	//net.forcesFromForceGen(forceGen);
+	PhysNet* net = new PhysNet(5, 5, 50.f, 10.f, &forceGen);
+	net->setPosition(sf::Vector2f(200.f, 50.f));
+	net->setRotation(-45.f);
+	net->setStiffness(0.1f);
 
 	bool quit = false;
 	while (!quit)
@@ -138,6 +137,7 @@ void Particle2D::Run()
 			else if (eve.type == sf::Event::MouseButtonPressed && eve.mouseButton.button == sf::Mouse::Right)
 			{
 				testSystem.setPosition(mousePos_mapped);
+				net->setPosition(mousePos_mapped);
 				break;
 			}
 			else if (eve.type == sf::Event::MouseWheelScrolled)
@@ -158,7 +158,10 @@ void Particle2D::Run()
 				{
 				case sf::Keyboard::H: std::cout << "no one can help you :)" << std::endl;
 					break;
-				case sf::Keyboard::M:
+				case sf::Keyboard::R:
+					delete net;
+					net = new PhysNet(5, 5, 50.f, 10.f, &forceGen);
+					net->setPosition(sf::Vector2f(200.f, 5.f));
 					break;
 				case sf::Keyboard::V:
 					break;
@@ -281,7 +284,7 @@ void Particle2D::Run()
 		forceGen.update(dt);
 		testBall.update(dt);
 		testSystem.update(dt);
-		net.update(dt);
+		net->update(dt);
 
 		//tickRun -= dt;
 		//if (tickRun <= 0.f)
@@ -324,7 +327,7 @@ void Particle2D::Run()
 		for (size_t i = 0; i < objectsInLevel; ++i)
 			m_window->draw(levelObjects[i]);
 		testSystem.drawParticles(m_window);
-		net.draw(m_window);
+		net->draw(m_window);
 
 		debugRect.setScale(vectorMath::magnitude(testBall.getVelocity()) * 10.f, 2.f);
 		debugRect.setPosition(testBall.getPosition() + testBall.getOrigin());
