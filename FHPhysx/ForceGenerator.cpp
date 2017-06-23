@@ -33,6 +33,18 @@ void ForceGenerator::addCollider(sf::RectangleShape * rs)
 	m_collider[m_colliderCount++] = rs;
 }
 
+sf::Vector2f ForceGenerator::accumulateForces(sf::Vector2f pos)
+{
+	sf::Vector2f force;
+	for (size_t j = 0; j < m_forceCount; ++j)
+		if (m_forces[j]->active == true && pos.y > m_forces[j]->yLimit.x && pos.y < m_forces[j]->yLimit.y)
+		{
+			force += *m_forces[j];
+		}
+
+	return force;
+}
+
 size_t ForceGenerator::getForces(Force ** & ptr)
 {
 	ptr = m_forces;
@@ -73,15 +85,7 @@ void ForceGenerator::update(float dt)
 			}
 		}
 
-		size_t forceCount = 0;
-		for (size_t j = 0; j < m_forceCount; ++j)
-			if (m_forces[j]->active == true && m_physBalls[i]->getPosition().y > m_forces[j]->yLimit.x &&  m_physBalls[i]->getPosition().y < m_forces[j]->yLimit.y)
-			{
-				force += *m_forces[j];
-				forceCount++;
-			}
-
-		//force /= ((forceCount > 0)? float(forceCount) : 1.0f);
+		force = accumulateForces(m_physBalls[i]->getPosition());
 
 		if (collision != -1)
 		{

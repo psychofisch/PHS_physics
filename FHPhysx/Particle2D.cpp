@@ -102,16 +102,16 @@ void Particle2D::Run()
 	particle.setFillColor(COLOR_2);
 	particle.setRadius(2.f);
 
-	ParticleSystem testSystem(1000);
-	testSystem.forcesFromForceGen(forceGen);
-	testSystem.objectsFromForceGen(forceGen);
+	ParticleSystem testSystem(1000, &forceGen);
+	//testSystem.forcesFromForceGen(forceGen);
+	//testSystem.objectsFromForceGen(forceGen);
 	testSystem.setPosition(sf::Vector2f(99.f, 77.f));
 	testSystem.setParticleShape(&particle);
 	testSystem.setActive(false);
 
-	PhysNet net(5, 5, 50.f, 10.f);
+	PhysNet net(5, 5, 50.f, 10.f, &forceGen);
 	net.setPosition(sf::Vector2f(200.f, 5.f));
-	net.forcesFromForceGen(forceGen);
+	//net.forcesFromForceGen(forceGen);
 
 	bool quit = false;
 	while (!quit)

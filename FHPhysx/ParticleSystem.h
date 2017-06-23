@@ -10,7 +10,7 @@ class ParticleSystem
 public:
 	enum RotationMode{ ROTATION_NONE = 0, ROTATION_LEFT = -1, ROTATION_RIGHT = 1 };
 
-	ParticleSystem(size_t numberOfParticles);
+	ParticleSystem(size_t numberOfParticles, ForceGenerator* forceGenPtr);
 	~ParticleSystem();
 
 	void setParticleShape(sf::CircleShape* p);
@@ -23,8 +23,9 @@ public:
 	void setLifetime(float lt);
 	void setParticleMass(float m);
 	size_t getNumberOfParticles();
-	void forcesFromForceGen(ForceGenerator& fg);
-	void objectsFromForceGen(ForceGenerator& fg);
+	void setForceGenPtr(ForceGenerator* fg);
+	//void forcesFromForceGen(ForceGenerator& fg);
+	//void objectsFromForceGen(ForceGenerator& fg);
 	size_t getActiveParticles();
 	void setActive(bool b);
 	bool isActive();
@@ -48,10 +49,7 @@ private:
 		m_particleMass;
 	RotationMode m_rotationMode;
 	size_t m_numberOfParticles,
-		m_activeParticles,
-		m_forceCount,
-		m_colliderCount;
-	Force** m_forces;
-	sf::RectangleShape** m_collider;
+		m_activeParticles;
+	ForceGenerator* m_forceGen;
 };
 

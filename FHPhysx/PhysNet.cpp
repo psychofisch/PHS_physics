@@ -1,13 +1,16 @@
 #include "PhysNet.h"
 
-PhysNet::PhysNet(int width, int height, float gap, float radius)
+PhysNet::PhysNet(int width, int height, float gap, float radius, ForceGenerator* forceGenPtr)
 	:m_position(sf::Vector2f()),
-	m_stiffness(1.f)
+	m_stiffness(1.f),
+	m_forceGen(forceGenPtr)
 {
 	m_size.x = width;
 	m_size.y = height;
 
+	m_nodeVel = new sf::Vector2f[m_size.x * m_size.y];
 	m_nodePos = new sf::Vector2f[m_size.x * m_size.y];
+
 	for (size_t y = 0; y < m_size.y; ++y)
 	{
 		for (size_t x = 0; x < m_size.x; ++x)
@@ -27,6 +30,7 @@ PhysNet::PhysNet(int width, int height, float gap, float radius)
 PhysNet::~PhysNet()
 {
 	delete[] m_nodePos;
+	delete[] m_nodeVel;
 }
 
 void PhysNet::setPosition(sf::Vector2f pos)
@@ -49,14 +53,21 @@ void PhysNet::setNodeColor(sf::Color c)
 	m_nodeShape.setFillColor(c);
 }
 
-void PhysNet::forcesFromForceGen(ForceGenerator & fg)
-{
-	m_forceCount = fg.getForces(m_forces);
-}
-
 void PhysNet::update(float dt)
 {
+	for (size_t y = 0; y < m_size.y; ++y)
+	{
+		for (size_t x = 0; x < m_size.x; ++x)
+		{
+			size_t index = x + y * m_size.x;
+			sf::Vector2f force;
 
+			force = m_forceGen->accumulateForces(m_nodePos[index]);
+
+			m_nodeVel[index] += force * dt;
+			m_nodePos[index] += m_nodeVel[index];
+		}
+	}
 }
 
 void PhysNet::draw(sf::RenderWindow * wndw)

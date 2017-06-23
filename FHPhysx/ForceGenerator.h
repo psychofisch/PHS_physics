@@ -24,6 +24,7 @@ public:
 	void addPhysBall(PhysBall* ph);
 	void addForce(Force* f);
 	void addCollider(sf::RectangleShape* rs);
+	sf::Vector2f accumulateForces(sf::Vector2f pos);
 	size_t getForces(Force**& ptr);
 	size_t getCollider(sf::RectangleShape**& ptr);
 	void removeForce(Force* f);

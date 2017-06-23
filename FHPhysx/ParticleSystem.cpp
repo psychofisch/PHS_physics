@@ -2,8 +2,9 @@
 
 
 
-ParticleSystem::ParticleSystem(size_t numberOfParticles)
+ParticleSystem::ParticleSystem(size_t numberOfParticles, ForceGenerator* forceGenPtr)
 	:m_numberOfParticles(numberOfParticles),
+	m_forceGen(forceGenPtr),
 	m_particlePos(new GameVec[numberOfParticles]),
 	m_particleVel(new sf::Vector2f[numberOfParticles]),
 	m_particleTTL(new float[numberOfParticles]),
@@ -14,7 +15,6 @@ ParticleSystem::ParticleSystem(size_t numberOfParticles)
 	m_angularVelocity(420.f * 2.f),
 	m_rotationMode(ROTATION_RIGHT),
 	m_spawnVelocity(2.f),
-	m_forceCount(0),
 	m_active(true)
 {
 }
@@ -74,16 +74,6 @@ void ParticleSystem::setParticleMass(float m)
 size_t ParticleSystem::getNumberOfParticles()
 {
 	return m_numberOfParticles;
-}
-
-void ParticleSystem::forcesFromForceGen(ForceGenerator & fg)
-{
-	m_forceCount = fg.getForces(m_forces);
-}
-
-void ParticleSystem::objectsFromForceGen(ForceGenerator & fg)
-{
-	m_colliderCount = fg.getCollider(m_collider);
 }
 
 size_t ParticleSystem::getActiveParticles()
@@ -146,17 +136,20 @@ void ParticleSystem::update(float dt)
 			m_activeParticles++;
 
 			int collide = -1;
+			sf::RectangleShape** colliders;
+			size_t colliderCount = m_forceGen->getCollider(colliders);
 
-			for (size_t c = 0; c < m_colliderCount; ++c)
+			for (size_t c = 0; c < colliderCount; ++c)
 			{
-				sf::Vector2f colliderPos = m_collider[c]->getPosition();
-				float colliderRot = m_collider[c]->getRotation();
-				sf::RectangleShape& collider = *m_collider[c];
+				sf::RectangleShape& collider = *colliders[c];
+
+				sf::Vector2f colliderPos = collider.getPosition();
+				float colliderRot = collider.getRotation();
 
 				int inside = 0;
 				for (int p = 0; p < 4; ++p)
 				{
-					sf::Vector2f p1 = m_collider[c]->getPosition() + vectorMath::rotateD(collider.getPoint(p), colliderRot),
+					sf::Vector2f p1 = colliderPos + vectorMath::rotateD(collider.getPoint(p), colliderRot),
 						p2;
 
 					if (p < 3)
@@ -182,15 +175,7 @@ void ParticleSystem::update(float dt)
 			sf::Vector2f force;
 			if (collide == -1)
 			{
-				size_t forceCount = 0;
-				for (size_t j = 0; j < m_forceCount; ++j)
-					if (m_forces[j]->active == true && m_particlePos[i].y > m_forces[j]->yLimit.x &&  m_particlePos[i].y < m_forces[j]->yLimit.y)
-					{
-						force += *m_forces[j];
-						forceCount++;
-					}
-
-				//force /= ((forceCount > 0) ? float(forceCount) : 1.0f);
+				force = m_forceGen->accumulateForces(m_particlePos[i]);
 
 				sf::Vector2f dragForce = -vectorMath::normalize(m_particleVel[i])*(1.f * vectorMath::magnitude(m_particleVel[i]) + 1.f * powf(vectorMath::magnitude(m_particleVel[i]), 2));
 				force += dragForce;
