@@ -9,6 +9,7 @@
 #include "ForceGenerator.h"
 #include "GameVec.h"
 #include "ParticleSystem.h"
+#include "PhysNet.h"
 
 #define COLOR_0 sf::Color(78, 253, 255)
 #define COLOR_1 sf::Color(37, 131, 232)

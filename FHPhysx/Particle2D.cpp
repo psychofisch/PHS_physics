@@ -109,6 +109,10 @@ void Particle2D::Run()
 	testSystem.setParticleShape(&particle);
 	testSystem.setActive(false);
 
+	PhysNet net(5, 5, 50.f, 10.f);
+	net.setPosition(sf::Vector2f(200.f, 5.f));
+	net.forcesFromForceGen(forceGen);
+
 	bool quit = false;
 	while (!quit)
 	{
@@ -277,6 +281,7 @@ void Particle2D::Run()
 		forceGen.update(dt);
 		testBall.update(dt);
 		testSystem.update(dt);
+		net.update(dt);
 
 		//tickRun -= dt;
 		//if (tickRun <= 0.f)
@@ -319,6 +324,7 @@ void Particle2D::Run()
 		for (size_t i = 0; i < objectsInLevel; ++i)
 			m_window->draw(levelObjects[i]);
 		testSystem.drawParticles(m_window);
+		net.draw(m_window);
 
 		debugRect.setScale(vectorMath::magnitude(testBall.getVelocity()) * 10.f, 2.f);
 		debugRect.setPosition(testBall.getPosition() + testBall.getOrigin());
@@ -348,6 +354,8 @@ void Particle2D::Run()
 		//*** render
 
 		dt = clock.getElapsedTime().asSeconds();
+		if (dt > 0.16f)
+			dt = 0.16f;
 	}
 }
 
