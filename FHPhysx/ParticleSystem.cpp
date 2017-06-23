@@ -126,15 +126,33 @@ void ParticleSystem::update(float dt)
 	{
 		if (m_particlePos[i].active)
 		{
+			//check if particle is still valid
 			m_particleTTL[i] -= dt;
 			if (m_particleTTL[i] < 0.f)
 			{
 				m_particlePos[i].active = false;
 				continue;
 			}
+			//***
 
-			m_activeParticles++;
+			//physBall collisions
+			PhysBall** physBalls;
+			size_t physBallCount = m_forceGen->getPhysBalls(physBalls);
 
+			for (size_t p = 0; p < physBallCount; ++p)
+			{
+				float distance = vectorMath::magnitude(m_particlePos[i] - physBalls[p]->getPosition());
+				if (distance < m_particleShape->getRadius() + physBalls[p]->getRadius())
+				{
+					m_particlePos[i].active = false;
+					continue;
+				}
+			}
+			//***
+
+			m_activeParticles++; //all actions after this cant deactivate the particle -> so add 1 to the counter
+
+			//box collisions
 			int collide = -1;
 			sf::RectangleShape** colliders;
 			size_t colliderCount = m_forceGen->getCollider(colliders);
@@ -171,7 +189,9 @@ void ParticleSystem::update(float dt)
 					break;
 				}
 			}
+			//***
 
+			//calc forces
 			sf::Vector2f force;
 			if (collide == -1)
 			{
@@ -184,9 +204,12 @@ void ParticleSystem::update(float dt)
 			{
 				force = -m_particleVel[i] / dt;
 			}
+			//***
 
+			//apply forces
 			m_particleVel[i] += force * dt;
 			m_particlePos[i] += m_particleVel[i];
+			//***
 		}
 	}
 	//*** pc

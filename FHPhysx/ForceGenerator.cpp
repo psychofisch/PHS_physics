@@ -57,6 +57,12 @@ size_t ForceGenerator::getCollider(sf::RectangleShape **& ptr)
 	return m_colliderCount;
 }
 
+size_t ForceGenerator::getPhysBalls(PhysBall **& ptr)
+{
+	ptr = m_physBalls;
+	return m_physBallCount;
+}
+
 void ForceGenerator::removeForce(Force * f)
 {
 	for (size_t j = 0; j < m_forceCount; ++j)
@@ -122,7 +128,7 @@ void ForceGenerator::update(float dt)
 				//force = m_physBalls[i]->getPosition() - m_collider[collision]->getPosition();
 				sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), -90.f);
 				//m_physBalls[i]->m_velocity = m_physBalls[i]->getVelocity() - 1.8f * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
-				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - 1.8f * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - 1.5f * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
 				reflection /= dt;
 				force += reflection;
 				//force = -1.9f * m_physBalls[i]->getVelocity() / dt;

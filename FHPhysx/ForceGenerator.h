@@ -27,6 +27,7 @@ public:
 	sf::Vector2f accumulateForces(sf::Vector2f pos);
 	size_t getForces(Force**& ptr);
 	size_t getCollider(sf::RectangleShape**& ptr);
+	size_t getPhysBalls(PhysBall**& ptr);
 	void removeForce(Force* f);
 	void update(float dt);
 
