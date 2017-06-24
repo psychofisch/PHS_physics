@@ -66,7 +66,7 @@ void Particle2D::Run()
 	PhysBall staticBall;
 	staticBall.setFillColor(COLOR_0);
 	staticBall.setRadius(radius);
-	staticBall.setPosition(420.f, 400.f);
+	staticBall.setPosition(418.f, 400.f);
 	staticBall.setOrigin(sf::Vector2f(radius, radius));
 
 	//Level
@@ -197,10 +197,10 @@ void Particle2D::Run()
 					fanForce.active = !fanForce.active;
 					break;
 				case sf::Keyboard::Q:
-					testBall.mass *= 0.9f;
+					//testBall.mass *= 0.9f;
 					break;
 				case sf::Keyboard::E:
-					testBall.mass *= 1.1f;
+					//testBall.mass *= 1.1f;
 					break;
 				case sf::Keyboard::U:
 					break;
@@ -366,7 +366,6 @@ void Particle2D::Run()
 			debugString << fps << std::endl;
 			debugString << static_cast<int>(mousePos_mapped.x) << ":" << static_cast<int>(mousePos_mapped.y) << std::endl;
 			debugString << "Active Particles: " << particleSystemL.getActiveParticles() << std::endl;
-			debugString << "testBall.mass: " << testBall.mass << std::endl;
 			debug_text.setString(debugString.str());
 			m_window->draw(debug_text);
 		}

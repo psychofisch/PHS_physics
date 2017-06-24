@@ -115,6 +115,26 @@ void PhysNet::update(float dt)
 				force += yForce;
 			}
 
+			//dynamic physBalls calc
+			PhysBall** physBalls;
+			size_t physBallCount = m_forceGen->getPhysBalls(physBalls);
+			for (size_t b = 0; b < physBallCount; ++b)
+			{
+				sf::Vector2f nodePos = m_position + m_nodePos[index];
+				sf::Vector2f distVec = nodePos - physBalls[b]->getPosition();
+				float dist = vectorMath::magnitude(distVec);
+				if (dist < m_nodeShape.getRadius() + physBalls[b]->getRadius())
+				{
+					force += physBalls[b]->getVelocity() / dt;
+					/*sf::Vector2f normal = vectorMath::normalize(distVec);
+					sf::Vector2f reflection = -m_nodeVel[index] + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+					reflection /= dt;
+					force += reflection;
+					break;*/
+				}
+			}
+			//*** dpc
+
 			m_nodeVel[index] *= 0.95f;
 			m_nodeVel[index] += force * dt;
 			m_nodePos[index] += m_nodeVel[index];

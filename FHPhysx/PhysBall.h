@@ -17,8 +17,9 @@ public:
 	void addImpulse(sf::Vector2f acceleration);
 	void resetToPosition(sf::Vector2f pos);
 
-	float mass;
+	//float mass;
 	MODE mode;
+	float bounciness;
 
 private:
 	sf::Vector2f m_velocity;
