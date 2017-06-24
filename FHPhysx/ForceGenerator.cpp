@@ -79,8 +79,30 @@ void ForceGenerator::update(float dt)
 {
 	for (size_t i = 0; i < m_physBallCount; ++i)
 	{
-		sf::Vector2f force;
+		//basic forces
+		sf::Vector2f force = accumulateForces(m_physBalls[i]->getPosition());
+		//*** bf
 
+		//dynamic physBalls calc
+		for (size_t b = 0; b < m_physBallCount; ++b)
+		{
+			if (i == b)
+				continue;
+			sf::Vector2f distVec = m_physBalls[i]->getPosition() - m_physBalls[b]->getPosition();
+			float dist = vectorMath::magnitude(distVec);
+			if (dist < m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())
+			{
+				//sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), -90.f);
+				sf::Vector2f normal = vectorMath::normalize(distVec);
+				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - 1.5f * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+				reflection /= dt;
+				force += reflection;
+				break;
+			}
+		}
+		//*** dpc
+
+		//static collider calcs
 		int collision = -1;
 		for (size_t c = 0; c < m_colliderCount; ++c)
 		{
@@ -90,8 +112,6 @@ void ForceGenerator::update(float dt)
 				break;
 			}
 		}
-
-		force = accumulateForces(m_physBalls[i]->getPosition());
 
 		if (collision != -1)
 		{
@@ -116,7 +136,7 @@ void ForceGenerator::update(float dt)
 
 				intersection = vectorMath::lineIntersection(l1, l2);
 				
-				if (vectorMath::magnitude(l1.p1 - intersection) < 10.0f)
+				if (vectorMath::magnitude(l1.p1 - intersection) < m_physBalls[i]->getRadius())
 				{
 					collisionIndex = p;
 					break;
@@ -135,6 +155,7 @@ void ForceGenerator::update(float dt)
 				//m_physBalls[i]->setPosition(intersection);
 			}
 		}
+		//*** scc
 
 		m_physBalls[i]->addImpulse(force * dt);
 	}

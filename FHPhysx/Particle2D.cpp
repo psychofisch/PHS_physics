@@ -63,6 +63,12 @@ void Particle2D::Run()
 	testBall.setPosition(420.f, 100.f);
 	testBall.setOrigin(sf::Vector2f(radius, radius));
 
+	PhysBall staticBall;
+	staticBall.setFillColor(COLOR_0);
+	staticBall.setRadius(radius);
+	staticBall.setPosition(420.f, 400.f);
+	staticBall.setOrigin(sf::Vector2f(radius, radius));
+
 	//Level
 	size_t objectsInLevel = 5;
 	sf::RectangleShape* levelObjects = new sf::RectangleShape[objectsInLevel];
@@ -94,6 +100,7 @@ void Particle2D::Run()
 	forceGen.addForce(&gravity);
 	forceGen.addForce(&fanForce);
 	forceGen.addPhysBall(&testBall);
+	forceGen.addPhysBall(&staticBall);
 
 	for(size_t i = 0; i < objectsInLevel; ++i)
 		forceGen.addCollider(&levelObjects[i]);
@@ -347,6 +354,7 @@ void Particle2D::Run()
 		debugRect.setRotation(vectorMath::angleD(testBall.getVelocity()));
 		m_window->draw(debugRect);
 		m_window->draw(testBall);
+		m_window->draw(staticBall);
 
 		//ui stuff
 		m_window->setView(m_uiView);
