@@ -96,6 +96,7 @@ void ForceGenerator::update(float dt)
 				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
 				reflection /= dt;
 				force += reflection;
+				m_physBalls[i]->setPosition(m_physBalls[b]->getPosition() + normal * (m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())); //TODO: with forces
 				break;
 			}
 		}
@@ -154,6 +155,8 @@ void ForceGenerator::update(float dt)
 				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
 				reflection /= dt;
 				force += reflection;
+
+				m_physBalls[i]->setPosition(intersection + normal * m_physBalls[i]->getRadius());//TODO: with forces
 			}
 		}
 		else
