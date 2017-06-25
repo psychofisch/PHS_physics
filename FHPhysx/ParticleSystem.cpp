@@ -152,25 +152,28 @@ void ParticleSystem::update(float dt)
 
 			m_activeParticles++; //all actions after this cant deactivate the particle -> so add 1 to the counter
 
-			//box collisions
+			//convex collisions
 			int collide = -1;
-			sf::RectangleShape** colliders;
+			sf::ConvexShape** colliders;
 			size_t colliderCount = m_forceGen->getCollider(colliders);
 
 			for (size_t c = 0; c < colliderCount; ++c)
 			{
-				sf::RectangleShape& collider = *colliders[c];
+				sf::ConvexShape& collider = *colliders[c];
 
 				sf::Vector2f colliderPos = collider.getPosition();
 				float colliderRot = collider.getRotation();
 
+				if (!collider.getGlobalBounds().contains(m_particlePos[i]))
+					continue;
+
 				int inside = 0;
-				for (int p = 0; p < 4; ++p)
+				for (int p = 0; p < collider.getPointCount(); ++p)
 				{
 					sf::Vector2f p1 = colliderPos + vectorMath::rotateD(collider.getPoint(p), colliderRot),
 						p2;
 
-					if (p < 3)
+					if (p < collider.getPointCount() - 1)
 						p2 = colliderPos + vectorMath::rotateD(collider.getPoint(p + 1), colliderRot);
 					else
 						p2 = colliderPos + vectorMath::rotateD(collider.getPoint(0), colliderRot);
@@ -183,7 +186,7 @@ void ParticleSystem::update(float dt)
 					}
 				}
 
-				if (inside == 4)
+				if (inside == collider.getPointCount())
 				{
 					collide = c;
 					break;

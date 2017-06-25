@@ -9,7 +9,7 @@ ForceGenerator::ForceGenerator()
 {
 	m_physBalls = new PhysBall*[128];
 	m_forces = new Force*[128];
-	m_collider = new sf::RectangleShape*[128];
+	m_collider = new sf::ConvexShape*[128];
 }
 
 ForceGenerator::~ForceGenerator()
@@ -28,7 +28,7 @@ void ForceGenerator::addForce(Force* f)
 	m_forces[m_forceCount++] = f;
 }
 
-void ForceGenerator::addCollider(sf::RectangleShape * rs)
+void ForceGenerator::addCollider(sf::ConvexShape * rs)
 {
 	m_collider[m_colliderCount++] = rs;
 }
@@ -51,7 +51,7 @@ size_t ForceGenerator::getForces(Force ** & ptr)
 	return m_forceCount;
 }
 
-size_t ForceGenerator::getCollider(sf::RectangleShape **& ptr)
+size_t ForceGenerator::getCollider(sf::ConvexShape **& ptr)
 {
 	ptr = m_collider;
 	return m_colliderCount;
@@ -114,7 +114,7 @@ void ForceGenerator::update(float dt)
 
 		if (collision != -1)
 		{
-			sf::RectangleShape& collider = *(m_collider[collision]);
+			sf::ConvexShape& collider = *(m_collider[collision]);
 			collider.setFillColor(sf::Color::Red);
 			sf::Vector2f colliderPos = collider.getPosition();
 			float colliderRot = collider.getRotation();
@@ -124,11 +124,11 @@ void ForceGenerator::update(float dt)
 			sf::Vector2f intersection;
 			
 			int collisionIndex = -1;
-			for (int p = 0; p < 4; ++p)
+			for (int p = 0; p < collider.getPointCount(); ++p)
 			{
 				l2.p1 = colliderPos + vectorMath::rotateD(collider.getPoint(p), colliderRot);
 
-				if(p < 3)
+				if(p < collider.getPointCount() - 1)
 					l2.p2 = colliderPos + vectorMath::rotateD(collider.getPoint(p + 1), colliderRot);
 				else
 					l2.p2 = colliderPos + vectorMath::rotateD(collider.getPoint(0), colliderRot);
@@ -151,16 +151,9 @@ void ForceGenerator::update(float dt)
 
 				sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), -90.f);
 
-				if (m_physBalls[i]->mode == PhysBall::MODE_FREEFALL)
-				{
-					sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
-					reflection /= dt;
-					force += reflection;
-				}
-				else if (m_physBalls[i]->mode == PhysBall::MODE_KINEMATIC)
-				{
-					force += normal * 100.8f;
-				}
+				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+				reflection /= dt;
+				force += reflection;
 			}
 		}
 		else

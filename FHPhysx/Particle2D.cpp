@@ -71,30 +71,58 @@ void Particle2D::Run()
 
 	//Level
 	size_t objectsInLevel = 5;
-	sf::RectangleShape* levelObjects = new sf::RectangleShape[objectsInLevel];
+	sf::ConvexShape* levelObjects = new sf::ConvexShape[objectsInLevel];
 
+	//floor
 	levelObjects[0].setFillColor(COLOR_1);
 	levelObjects[0].setPosition(-100.f, 650.f);
-	levelObjects[0].setSize(sf::Vector2f(1480.0f, 150.f));
+	levelObjects[0].setPointCount(4);
+	levelObjects[0].setPoint(0, sf::Vector2f(0, 0));
+	levelObjects[0].setPoint(1, sf::Vector2f(1480.f, 0));
+	levelObjects[0].setPoint(2, sf::Vector2f(1480.f, 150.f));
+	levelObjects[0].setPoint(3, sf::Vector2f(0, 150.f));
+	//levelObjects[0].setSize(sf::Vector2f(1480.0f, 150.f));
 
+	//triangle
 	levelObjects[1].setFillColor(COLOR_1);
-	levelObjects[1].setPosition(-100.f, 400.f);
-	levelObjects[1].setSize(sf::Vector2f(350.f, 150.f));
-	levelObjects[1].setRotation(45.f);
+	levelObjects[1].setPosition(0.f, 400.f);
+	levelObjects[1].setPointCount(3);
+	levelObjects[1].setPoint(0, sf::Vector2f(0, 0));
+	levelObjects[1].setPoint(1, sf::Vector2f(250.f, 250.f));
+	levelObjects[1].setPoint(2, sf::Vector2f(0, 250.f));
+	//levelObjects[1].setSize(sf::Vector2f(350.f, 150.f));
 
+	//left block
 	levelObjects[2].setFillColor(COLOR_1);
 	levelObjects[2].setPosition(700.f, 350.f);
-	levelObjects[2].setSize(sf::Vector2f(250.f, 20.f));
+	levelObjects[2].setPointCount(4);
+	levelObjects[2].setPoint(0, sf::Vector2f(0, 0));
+	levelObjects[2].setPoint(1, sf::Vector2f(250.f, 0));
+	levelObjects[2].setPoint(2, sf::Vector2f(250.f, 20.f));
+	levelObjects[2].setPoint(3, sf::Vector2f(0, 20.f));
+	//levelObjects[2].setSize(sf::Vector2f(250.f, 20.f));
 	levelObjects[2].setRotation(145.f);
 
+	//right block
 	levelObjects[3].setFillColor(COLOR_1);
 	levelObjects[3].setPosition(690.f, 330.f);
-	levelObjects[3].setSize(sf::Vector2f(250.f, 20.f));
+	levelObjects[3].setPointCount(4);
+	levelObjects[3].setPoint(0, sf::Vector2f(0, 0));
+	levelObjects[3].setPoint(1, sf::Vector2f(250.f, 0));
+	levelObjects[3].setPoint(2, sf::Vector2f(250.f, 20.f));
+	levelObjects[3].setPoint(3, sf::Vector2f(0, 20.f));
+	//levelObjects[3].setSize(sf::Vector2f(250.f, 20.f));
 	levelObjects[3].setRotation(10.f);
 
+	//fan
 	levelObjects[4].setFillColor(COLOR_1);
 	levelObjects[4].setPosition(1200.f, 200.f);
-	levelObjects[4].setSize(sf::Vector2f(80.f, 200.f));
+	levelObjects[4].setPointCount(4);
+	levelObjects[4].setPoint(0, sf::Vector2f(0, 0));
+	levelObjects[4].setPoint(1, sf::Vector2f(80.f, 0));
+	levelObjects[4].setPoint(2, sf::Vector2f(80.f, 200.f));
+	levelObjects[4].setPoint(3, sf::Vector2f(0, 200.f));
+	//levelObjects[4].setSize(sf::Vector2f(80.f, 200.f));
 
 	ForceGenerator forceGen;
 	forceGen.addForce(&gravity);
@@ -124,7 +152,7 @@ void Particle2D::Run()
 	particleSystemR.setActive(false);
 	particleSystemR.setRotationMode(ParticleSystem::ROTATION_LEFT);
 
-	PhysNet* net = new PhysNet(5, 5, 50.f, 10.f, &forceGen);
+	PhysNet* net = new PhysNet(10, 10, 20.f, 10.f, &forceGen);
 	net->setPosition(sf::Vector2f(200.f, 20.f));
 	//net->setRotation(-45.f);
 	net->setStiffness(0.1f);
@@ -205,39 +233,6 @@ void Particle2D::Run()
 				case sf::Keyboard::U:
 					break;
 				case sf::Keyboard::T:
-				{
-					for (size_t c = 0; c < objectsInLevel; ++c)
-					{
-						sf::RectangleShape& collider = levelObjects[c];
-						sf::Vector2f colliderPos = collider.getPosition();
-						float colliderRot = collider.getRotation();
-
-						int inside = 0;
-						for (int p = 0; p < 4; ++p)
-						{
-							sf::Vector2f p1 = colliderPos + vectorMath::rotateD(collider.getPoint(p), colliderRot),
-								p2;
-
-							if (p < 3)
-								p2 = colliderPos + vectorMath::rotateD(collider.getPoint(p + 1), colliderRot);
-							else
-								p2 = colliderPos + vectorMath::rotateD(collider.getPoint(0), colliderRot);
-
-							float sign = vectorMath::sign(mousePos_mapped, p1, p2);
-
-							if (sign > 0.f)
-							{
-								inside++;
-							}
-						}
-
-						if (inside == 4)
-						{
-							std::cout << c << ": " << inside << std::endl;
-							collider.setFillColor(sf::Color::Green);
-						}
-					}
-				}
 					break;
 				case sf::Keyboard::Num1:
 					break;
