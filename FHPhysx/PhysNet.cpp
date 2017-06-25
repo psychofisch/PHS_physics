@@ -84,7 +84,8 @@ void PhysNet::update(float dt)
 			{
 				//sf::Vector2f d = m_nodePos[index] - m_nodePos[x + (y + 1)*m_size.x];
 				sf::Vector2f dUp, dDown, dLeft, dRight;
-				sf::Vector2f hardLimit, yForce;
+				sf::Vector2f yForce;
+				float forceLimit = 100.f;
 
 				dUp = m_nodePos[index] - m_nodePos[x + (y - 1)*m_size.x];
 
@@ -107,10 +108,17 @@ void PhysNet::update(float dt)
 				//	yForce = - m_stiffness * (vectorMath::magnitude(d) - m_springLength) * d;
 				//}
 
+				//if(vectorMath::magnitude(dUp) > m_springLength)
 				yForce += -m_stiffness * (vectorMath::magnitude(dUp) - m_springLength) * dUp;
+				//if (vectorMath::magnitude(dDown) > m_springLength)
 				yForce += -m_stiffness * (vectorMath::magnitude(dDown) - m_springLength) * dDown;
+				//if (vectorMath::magnitude(dLeft) > m_springLength)
 				yForce += -m_stiffness * (vectorMath::magnitude(dLeft) - m_springLength) * dLeft;
-				yForce += -m_stiffness * (vectorMath::magnitude(dRight) - m_springLength) * dRight;
+				//if (vectorMath::magnitude(dRight) > m_springLength)
+					yForce += -m_stiffness * (vectorMath::magnitude(dRight) - m_springLength) * dRight;
+
+				if (vectorMath::magnitude(yForce) > forceLimit)
+					yForce = vectorMath::normalize(yForce) * forceLimit;
 
 				force += yForce;
 			}
@@ -125,7 +133,8 @@ void PhysNet::update(float dt)
 				float dist = vectorMath::magnitude(distVec);
 				if (dist < m_nodeShape.getRadius() + physBalls[b]->getRadius())
 				{
-					force += physBalls[b]->getVelocity() / dt;
+					//force += physBalls[b]->getVelocity() / dt;
+					force += vectorMath::normalize((m_position + m_nodePos[index]) - physBalls[b]->getPosition()) * vectorMath::magnitude(physBalls[b]->getVelocity()) / dt;
 					/*sf::Vector2f normal = vectorMath::normalize(distVec);
 					sf::Vector2f reflection = -m_nodeVel[index] + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
 					reflection /= dt;

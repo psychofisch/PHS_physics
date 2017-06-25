@@ -8,7 +8,7 @@ PhysBall::PhysBall()
 	mode(MODE_FREEFALL),
 	bounciness(.5f)
 {
-	sf::CircleShape::setPointCount(8);
+	sf::CircleShape::setPointCount(16);
 }
 
 

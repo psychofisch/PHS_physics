@@ -144,16 +144,27 @@ void ForceGenerator::update(float dt)
 
 			if (collisionIndex >= 0)
 			{
-				//force = m_physBalls[i]->getPosition() - m_collider[collision]->getPosition();
+				if (m_physBalls[i]->getVelocity().y < 1.f)
+					m_physBalls[i]->mode = PhysBall::MODE_KINEMATIC;
+				else
+					m_physBalls[i]->mode = PhysBall::MODE_FREEFALL;
+
 				sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), -90.f);
-				//m_physBalls[i]->m_velocity = m_physBalls[i]->getVelocity() - 1.8f * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
-				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
-				reflection /= dt;
-				force += reflection;
-				//force = -1.9f * m_physBalls[i]->getVelocity() / dt;
-				//m_physBalls[i]->setPosition(intersection);
+
+				if (m_physBalls[i]->mode == PhysBall::MODE_FREEFALL)
+				{
+					sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+					reflection /= dt;
+					force += reflection;
+				}
+				else if (m_physBalls[i]->mode == PhysBall::MODE_KINEMATIC)
+				{
+					force += normal * 100.8f;
+				}
 			}
 		}
+		else
+			m_physBalls[i]->mode = PhysBall::MODE_FREEFALL;
 		//*** scc
 
 		m_physBalls[i]->addImpulse(force * dt);

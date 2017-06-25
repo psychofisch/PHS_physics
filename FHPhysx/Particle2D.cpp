@@ -66,7 +66,7 @@ void Particle2D::Run()
 	PhysBall staticBall;
 	staticBall.setFillColor(COLOR_0);
 	staticBall.setRadius(radius);
-	staticBall.setPosition(418.f, 400.f);
+	staticBall.setPosition(518.f, 400.f);
 	staticBall.setOrigin(sf::Vector2f(radius, radius));
 
 	//Level
@@ -79,7 +79,7 @@ void Particle2D::Run()
 
 	levelObjects[1].setFillColor(COLOR_1);
 	levelObjects[1].setPosition(-100.f, 400.f);
-	levelObjects[1].setSize(sf::Vector2f(400.f, 150.f));
+	levelObjects[1].setSize(sf::Vector2f(350.f, 150.f));
 	levelObjects[1].setRotation(45.f);
 
 	levelObjects[2].setFillColor(COLOR_1);
@@ -125,7 +125,7 @@ void Particle2D::Run()
 	particleSystemR.setRotationMode(ParticleSystem::ROTATION_LEFT);
 
 	PhysNet* net = new PhysNet(5, 5, 50.f, 10.f, &forceGen);
-	net->setPosition(sf::Vector2f(200.f, 50.f));
+	net->setPosition(sf::Vector2f(200.f, 20.f));
 	//net->setRotation(-45.f);
 	net->setStiffness(0.1f);
 
