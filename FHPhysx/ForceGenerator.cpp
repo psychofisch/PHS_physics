@@ -156,7 +156,7 @@ void ForceGenerator::update(float dt)
 				reflection /= dt;
 				force += reflection;
 
-				m_physBalls[i]->setPosition(intersection + normal * m_physBalls[i]->getRadius());//TODO: with forces
+				m_physBalls[i]->setPosition(intersection + vectorMath::normalize(-m_physBalls[i]->getVelocity()) * m_physBalls[i]->getRadius());//TODO: with forces
 			}
 		}
 		else
