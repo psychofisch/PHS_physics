@@ -153,7 +153,8 @@ void ParticleSystem::update(float dt)
 			m_activeParticles++; //all actions after this cant deactivate the particle -> so add 1 to the counter
 
 			//convex collisions
-			int collide = -1;
+			int collide = -1,
+				collide2 = -1;
 			sf::ConvexShape** colliders;
 			size_t colliderCount = m_forceGen->getCollider(colliders);
 
@@ -205,6 +206,7 @@ void ParticleSystem::update(float dt)
 			}
 			else
 			{
+				m_particlePos[i] -= m_particleVel[i];
 				force = -m_particleVel[i] / dt;
 			}
 			//***

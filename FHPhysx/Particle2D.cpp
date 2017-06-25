@@ -136,6 +136,7 @@ void Particle2D::Run()
 	sf::CircleShape particleA;
 	particleA.setFillColor(COLOR_2);
 	particleA.setRadius(2.f);
+	particleA.setOrigin(1.f, 2.f);
 
 	ParticleSystem particleSystemL(1000, &forceGen);
 	particleSystemL.setPosition(sf::Vector2f(99.f, 77.f));
@@ -145,6 +146,7 @@ void Particle2D::Run()
 	sf::CircleShape particleB;
 	particleB.setFillColor(COLOR_3);
 	particleB.setRadius(4.f);
+	particleB.setOrigin(2.f, 4.f);
 
 	ParticleSystem particleSystemR(1000, &forceGen);
 	particleSystemR.setPosition(sf::Vector2f(1000.f, 100.f));

@@ -47,4 +47,5 @@ namespace vectorMath {
 	float pow2(float a);
 	float sign(sf::Vector2f point, sf::Vector2f p1, sf::Vector2f p2);
 	bool pointInTriangle(sf::Vector2f point, sf::Vector2f t1, sf::Vector2f t2, sf::Vector2f t3);
+	sf::Vector2f projectPointOnLine(sf::Vector2f l1, sf::Vector2f l2, sf::Vector2f p);
 }

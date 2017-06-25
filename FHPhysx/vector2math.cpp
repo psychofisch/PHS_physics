@@ -177,3 +177,15 @@ bool vectorMath::pointInTriangle(sf::Vector2f point, sf::Vector2f t1, sf::Vector
 
 	return ((b1 == b2) && (b2 == b3));
 }
+
+sf::Vector2f vectorMath::projectPointOnLine(sf::Vector2f l1, sf::Vector2f l2, sf::Vector2f p)
+{
+	float m = (l2.y - l1.y) / (l2.x - l1.x);
+	float b = l1.y - (m * l1.x);
+
+	float tmp = 1 / (m * m + 1);
+	float x = (m * p.y + p.x - m * b) / tmp;
+	float y = (m * m * p.y + m * p.x + b) / tmp;
+
+	return sf::Vector2f(x, y);
+}
