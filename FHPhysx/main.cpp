@@ -5,14 +5,14 @@
 #include "Particle2D.h"
 #include "CollisionDetection.h"
 
-enum MODE { MODE_MOONLANDER = 0, MODE_COLLISION };
+enum MODE { MODE_PARTICLE = 0, MODE_COLLISION };
 
 void main(int argc, const char* argv[])
 {
 	bool debug = false;
 	int triangles = 324;
 	float gap = 50.0f;
-	MODE mode = MODE_COLLISION;
+	MODE mode = MODE_PARTICLE;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -20,7 +20,7 @@ void main(int argc, const char* argv[])
 		{
 			++i;
 			if (strcmp(argv[i], "particle") == 0)
-				mode = MODE_MOONLANDER;
+				mode = MODE_PARTICLE;
 			else if (strcmp(argv[i], "collision") == 0)
 				mode =	MODE_COLLISION;
 		}
@@ -62,12 +62,12 @@ void main(int argc, const char* argv[])
 	sf::RenderWindow window(vm, "PHS Project", sf::Style::Titlebar | sf::Style::Close | sf::Style::Default, settings);
 	window.setFramerateLimit(144);
 
-	if (mode == MODE_MOONLANDER)
+	if (mode == MODE_PARTICLE)
 	{
 		std::cout << "Particle2D started...\n";
 
 		Particle2D particle;
-		particle.physxTick = .016f;
+		particle.physxTick = .01f;
 
 		particle.setRenderWindow(&window);
 		particle.setWorldDimensions(300, 1000);

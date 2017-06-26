@@ -144,7 +144,7 @@ void PhysNet::update(float dt)
 			}
 			//*** dpc
 
-			m_nodeVel[index] -= m_nodeVel[index] * 0.08f;
+			m_nodeVel[index] -= m_nodeVel[index] * 0.05f;
 			m_nodeVel[index] += force * dt;
 			m_nodePos[index] += m_nodeVel[index];
 		}

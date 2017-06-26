@@ -69,13 +69,13 @@ void Particle2D::Run()
 	testBall.setOrigin(sf::Vector2f(radius, radius));
 
 	sf::Vector2f ballSpawn(1280.f * 0.5f, 10.f);
-	size_t numberOfBalls = 100;
+	size_t numberOfBalls = 20;
 	PhysBall* ballArray = new PhysBall[numberOfBalls];
 	for (size_t i = 0; i < numberOfBalls; ++i)
 	{
 		ballArray[i].setFillColor(COLOR_0);
 		ballArray[i].setRadius(radius);
-		ballArray[i].setPosition(ballSpawn - sf::Vector2f(0.f, float(i) * 30.f));
+		ballArray[i].setPosition(ballSpawn - sf::Vector2f((float(rand()) / RAND_MAX - 0.5f) * 50.f, float(i) * 30.f));
 		ballArray[i].setOrigin(sf::Vector2f(radius, radius));
 	}
 
@@ -182,6 +182,7 @@ void Particle2D::Run()
 	//net->setRotation(-45.f);
 	net->setStiffness(0.1f);
 
+	float timeSinceLastPhysxUpdate = 0.f;
 	bool quit = false;
 	while (!quit)
 	{
@@ -325,18 +326,24 @@ void Particle2D::Run()
 
 		/*for (size_t i = 0; i < objectsInLevel; ++i)
 			levelObjects[i].setFillColor(COLOR_1);*/
-		forceGen.update(physTick);
-		testBall.update(physTick);
-		for (size_t i = 0; i < numberOfBalls; ++i)
+		if (true || timeSinceLastPhysxUpdate >= physTick)
 		{
-			if (ballArray[i].getPosition().y > worldLimits.height)
-				ballArray[i].resetToPosition(ballSpawn);
+			//timeSinceLastPhysxUpdate *= 0.1f;
+			forceGen.update(timeSinceLastPhysxUpdate);
+			testBall.update(timeSinceLastPhysxUpdate);
+			for (size_t i = 0; i < numberOfBalls; ++i)
+			{
+				if (ballArray[i].getPosition().y > worldLimits.height)
+					ballArray[i].resetToPosition(ballSpawn);
 
-			ballArray[i].update(physTick);
+				ballArray[i].update(timeSinceLastPhysxUpdate);
+			}
+			particleSystemL.update(timeSinceLastPhysxUpdate);
+			particleSystemR.update(timeSinceLastPhysxUpdate);
+			net->update(timeSinceLastPhysxUpdate);
+
+			timeSinceLastPhysxUpdate = 0;
 		}
-		particleSystemL.update(physTick);
-		particleSystemR.update(physTick);
-		net->update(physTick);
 
 		//tickRun -= dt;
 		//if (tickRun <= 0.f)
@@ -414,6 +421,7 @@ void Particle2D::Run()
 		//*** render
 
 		dt = clock.getElapsedTime().asSeconds();
+		timeSinceLastPhysxUpdate += dt;
 
 		/*physTick = dt;
 		if (physTick > 0.16f)

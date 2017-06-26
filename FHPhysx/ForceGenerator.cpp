@@ -96,11 +96,21 @@ void ForceGenerator::update(float dt)
 			if (dist < m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())
 			{
 				sf::Vector2f normal = vectorMath::normalize(distVec);
-				sf::Vector2f reflection = -(1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
-				reflection /= dt;
-				force += reflection;
-				m_physBalls[i]->setPosition(m_physBalls[b]->getPosition() + normal * (m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())); //TODO: with forces
-				break;
+
+				//if (vectorMath::dot(m_physBalls[i]->getVelocity(), m_physBalls[b]->getVelocity()) > 0.f)
+				//{
+				//	force += vectorMath::magnitude(m_physBalls[b]->getVelocity()) * -normal / dt;
+				//	//m_physBalls[i]->setPosition(m_physBalls[i]->getPosition() - normal * (m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())); //TODO: with forces
+				//}
+				//else
+				{
+					sf::Vector2f reflection = -(1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+					reflection /= dt;
+					force += reflection;
+					force += 25.f * normal;
+					//m_physBalls[i]->setPosition(m_physBalls[b]->getPosition() + normal * (m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())); //TODO: with forces
+				}
+				//break;
 			}
 		}
 		//*** dpc
@@ -149,7 +159,7 @@ void ForceGenerator::update(float dt)
 			//collider.setFillColor(sf::Color::Red);
 			sf::Vector2f colliderPos = collider.getPosition();
 			float colliderRot = collider.getRotation();
-			sf::Vector2fLines l1(m_physBalls[i]->getPosition(), m_physBalls[i]->getPosition() + m_physBalls[i]->getVelocity()),
+			sf::Vector2fLines l1(m_physBalls[i]->getPosition(), m_physBalls[i]->getPosition() + m_physBalls[i]->getVelocity() * 2.0f),
 				l2;
 
 			sf::Vector2f intersection;
@@ -186,7 +196,12 @@ void ForceGenerator::update(float dt)
 				reflection /= dt;
 				force += reflection;
 
-				m_physBalls[i]->setPosition(intersection + vectorMath::normalize(normal) * m_physBalls[i]->getRadius());//TODO: with forces
+				force += 25.f * normal;
+
+				sf::Vector2f friction = m_physBalls[i]->getVelocity() * 0.1f / dt;
+				force -= friction;
+				
+				//m_physBalls[i]->setPosition(intersection + vectorMath::normalize(normal) * m_physBalls[i]->getRadius());//TODO: with forces
 
 				/*if (vectorMath::magnitude(m_physBalls[i]->getVelocity()) < 0.1f)
 					m_physBalls[i]->addImpulse(-m_physBalls[i]->getVelocity() / dt);*/
