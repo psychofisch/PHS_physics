@@ -14,7 +14,8 @@ void Particle2D::Run()
 	m_view = m_window->getDefaultView();
 
 	sf::Clock clock;
-	float dt = 0.16f;
+	float dt = 0.016f,
+		physTick = physxTick;
 
 	int mouseMoveRectSize = 200;
 	//sf::IntRect mouseMoveRect = sf::IntRect((m_window->getSize().x - mouseMoveRectSize) * 0.5f, (m_window->getSize().x - mouseMoveRectSize) * 0.5f, mouseMoveRectSize, mouseMoveRectSize);
@@ -249,7 +250,7 @@ void Particle2D::Run()
 				case sf::Keyboard::F:
 					fanForce.active = !fanForce.active;
 					if (fanForce.active)
-						levelObjects[4].setFillColor(COLOR_3);
+						levelObjects[4].setFillColor(COLOR_4);
 					else
 						levelObjects[4].setFillColor(COLOR_1);
 					break;
@@ -324,18 +325,18 @@ void Particle2D::Run()
 
 		/*for (size_t i = 0; i < objectsInLevel; ++i)
 			levelObjects[i].setFillColor(COLOR_1);*/
-		forceGen.update(dt);
-		testBall.update(dt);
+		forceGen.update(physTick);
+		testBall.update(physTick);
 		for (size_t i = 0; i < numberOfBalls; ++i)
 		{
-			if (!worldLimits.contains(ballArray[i].getPosition()))
+			if (ballArray[i].getPosition().y > worldLimits.height)
 				ballArray[i].resetToPosition(ballSpawn);
 
-			ballArray[i].update(dt);
+			ballArray[i].update(physTick);
 		}
-		particleSystemL.update(dt);
-		particleSystemR.update(dt);
-		net->update(dt);
+		particleSystemL.update(physTick);
+		particleSystemR.update(physTick);
+		net->update(physTick);
 
 		//tickRun -= dt;
 		//if (tickRun <= 0.f)
@@ -413,8 +414,10 @@ void Particle2D::Run()
 		//*** render
 
 		dt = clock.getElapsedTime().asSeconds();
-		if (dt > 0.16f)
-			dt = 0.16f;
+
+		/*physTick = dt;
+		if (physTick > 0.16f)
+			physTick = 0.16f;*/
 	}
 
 	delete[] ballArray;

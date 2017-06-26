@@ -131,7 +131,7 @@ void PhysNet::update(float dt)
 				sf::Vector2f nodePos = m_position + m_nodePos[index];
 				sf::Vector2f distVec = nodePos - physBalls[b]->getPosition();
 				float dist = vectorMath::magnitude(distVec);
-				if (dist < m_nodeShape.getRadius() + physBalls[b]->getRadius())
+				if (dist < m_nodeShape.getRadius() + physBalls[b]->getRadius() && vectorMath::magnitude(physBalls[b]->getVelocity()) > 0.1f)
 				{
 					//force += physBalls[b]->getVelocity() / dt;
 					force += vectorMath::normalize((m_position + m_nodePos[index]) - physBalls[b]->getPosition()) * vectorMath::magnitude(physBalls[b]->getVelocity()) / dt;
@@ -144,7 +144,7 @@ void PhysNet::update(float dt)
 			}
 			//*** dpc
 
-			m_nodeVel[index] *= 0.95f;
+			m_nodeVel[index] -= m_nodeVel[index] * 0.08f;
 			m_nodeVel[index] += force * dt;
 			m_nodePos[index] += m_nodeVel[index];
 		}

@@ -201,7 +201,7 @@ void ParticleSystem::update(float dt)
 			{
 				force = m_forceGen->accumulateForces(m_particlePos[i]);
 
-				sf::Vector2f dragForce = -vectorMath::normalize(m_particleVel[i])*(1.f * vectorMath::magnitude(m_particleVel[i]) + 1.f * powf(vectorMath::magnitude(m_particleVel[i]), 2));
+				sf::Vector2f dragForce = -vectorMath::normalize(m_particleVel[i])*(.5f * vectorMath::magnitude(m_particleVel[i]) + .5f * powf(vectorMath::magnitude(m_particleVel[i]), 2));
 				force += dragForce;
 			}
 			else
