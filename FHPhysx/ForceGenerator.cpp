@@ -15,7 +15,7 @@ ForceGenerator::ForceGenerator()
 ForceGenerator::~ForceGenerator()
 {
 	delete[] m_physBalls;
-	delete[] m_forces;
+	//delete[] m_forces;
 }
 
 void ForceGenerator::addPhysBall(PhysBall* ph)
@@ -81,6 +81,9 @@ void ForceGenerator::update(float dt)
 	{
 		//basic forces
 		sf::Vector2f force = accumulateForces(m_physBalls[i]->getPosition());
+
+		sf::Vector2f dragForce = -vectorMath::normalize(m_physBalls[i]->getVelocity())*(.1f * vectorMath::magnitude(m_physBalls[i]->getVelocity()) + .1f * powf(vectorMath::magnitude(m_physBalls[i]->getVelocity()), 2));
+		force += dragForce;
 		//*** bf
 
 		//dynamic physBalls calc
@@ -93,7 +96,7 @@ void ForceGenerator::update(float dt)
 			if (dist < m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())
 			{
 				sf::Vector2f normal = vectorMath::normalize(distVec);
-				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+				sf::Vector2f reflection = -(1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
 				reflection /= dt;
 				force += reflection;
 				m_physBalls[i]->setPosition(m_physBalls[b]->getPosition() + normal * (m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())); //TODO: with forces
@@ -123,7 +126,8 @@ void ForceGenerator::update(float dt)
 					else
 						p2 = colliderPos + vectorMath::rotateD(collider.getPoint(0), colliderRot);
 
-					float sign = vectorMath::sign(m_physBalls[i]->getPosition(), p1, p2);
+					sf::Vector2f closestPoint = m_physBalls[i]->getPosition() + vectorMath::normalize(m_physBalls[i]->getVelocity()) * m_physBalls[i]->getRadius();
+					float sign = vectorMath::sign(closestPoint, p1, p2);
 
 					if (sign > 0.f)
 					{
@@ -176,13 +180,16 @@ void ForceGenerator::update(float dt)
 				else
 					m_physBalls[i]->mode = PhysBall::MODE_FREEFALL;
 
-				sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), 90.f);
+				sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), -90.f);
 
-				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
+				sf::Vector2f reflection = -(1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
 				reflection /= dt;
 				force += reflection;
 
-				m_physBalls[i]->setPosition(intersection + vectorMath::normalize(-m_physBalls[i]->getVelocity()) * m_physBalls[i]->getRadius());//TODO: with forces
+				m_physBalls[i]->setPosition(intersection + vectorMath::normalize(normal) * m_physBalls[i]->getRadius());//TODO: with forces
+
+				/*if (vectorMath::magnitude(m_physBalls[i]->getVelocity()) < 0.1f)
+					m_physBalls[i]->addImpulse(-m_physBalls[i]->getVelocity() / dt);*/
 			}
 		}
 		else

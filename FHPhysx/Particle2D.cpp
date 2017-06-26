@@ -17,7 +17,7 @@ void Particle2D::Run()
 	float dt = 0.16f;
 
 	int mouseMoveRectSize = 200;
-	sf::IntRect mouseMoveRect = sf::IntRect((m_window->getSize().x - mouseMoveRectSize) / 2, (m_window->getSize().x - mouseMoveRectSize) / 2, mouseMoveRectSize, mouseMoveRectSize);
+	//sf::IntRect mouseMoveRect = sf::IntRect((m_window->getSize().x - mouseMoveRectSize) * 0.5f, (m_window->getSize().x - mouseMoveRectSize) * 0.5f, mouseMoveRectSize, mouseMoveRectSize);
 	sf::Vector2f windowCenter(m_window->getSize());
 	windowCenter *= .5f;
 
@@ -49,6 +49,12 @@ void Particle2D::Run()
 	Force gravity(0.f, 9.81f);
 	gravity.active = true;
 
+	//level setup
+	sf::FloatRect worldLimits;
+	worldLimits.top = worldLimits.left = 0.f;
+	worldLimits.width = 1280.f;
+	worldLimits.height = 720.f;
+
 	Force fanForce(-5.0f, 0.f);
 	fanForce.active = false;
 	fanForce.yLimit.x = 200.f;
@@ -61,12 +67,14 @@ void Particle2D::Run()
 	testBall.setPosition(420.f, 100.f);
 	testBall.setOrigin(sf::Vector2f(radius, radius));
 
-	PhysBall* ballArray = new PhysBall[20];
-	for (size_t i = 0; i < 20; ++i)
+	sf::Vector2f ballSpawn(1280.f * 0.5f, 10.f);
+	size_t numberOfBalls = 100;
+	PhysBall* ballArray = new PhysBall[numberOfBalls];
+	for (size_t i = 0; i < numberOfBalls; ++i)
 	{
 		ballArray[i].setFillColor(COLOR_0);
 		ballArray[i].setRadius(radius);
-		ballArray[i].setPosition(500.f, -float(i) * 30.f);
+		ballArray[i].setPosition(ballSpawn - sf::Vector2f(0.f, float(i) * 30.f));
 		ballArray[i].setOrigin(sf::Vector2f(radius, radius));
 	}
 
@@ -138,7 +146,7 @@ void Particle2D::Run()
 	forceGen.addForce(&fanForce);
 	forceGen.addPhysBall(&testBall);
 	forceGen.addPhysBall(&staticBall);
-	for (size_t i = 0; i < 20; ++i)
+	for (size_t i = 0; i < numberOfBalls; ++i)
 	{
 		forceGen.addPhysBall(&(ballArray[i]));
 	}
@@ -197,8 +205,9 @@ void Particle2D::Run()
 			}
 			else if (eve.type == sf::Event::MouseButtonPressed && eve.mouseButton.button == sf::Mouse::Right)
 			{
-				particleSystemL.setPosition(mousePos_mapped);
-				net->setPosition(mousePos_mapped);
+				//particleSystemL.setPosition(mousePos_mapped);
+				//net->setPosition(mousePos_mapped);
+				ballSpawn = mousePos_mapped;
 				break;
 			}
 			else if (eve.type == sf::Event::MouseWheelScrolled)
@@ -239,6 +248,10 @@ void Particle2D::Run()
 					break;
 				case sf::Keyboard::F:
 					fanForce.active = !fanForce.active;
+					if (fanForce.active)
+						levelObjects[4].setFillColor(COLOR_3);
+					else
+						levelObjects[4].setFillColor(COLOR_1);
 					break;
 				case sf::Keyboard::Q:
 					//testBall.mass *= 0.9f;
@@ -272,7 +285,7 @@ void Particle2D::Run()
 			}
 		}
 
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Middle) && !mouseMoveRect.contains(mousePos))
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)/* && !mouseMoveRect.contains(mousePos)*/)
 		{
 			m_view.move((sf::Vector2f(mousePos) - windowCenter)*dt);
 		}
@@ -313,8 +326,11 @@ void Particle2D::Run()
 			levelObjects[i].setFillColor(COLOR_1);*/
 		forceGen.update(dt);
 		testBall.update(dt);
-		for (size_t i = 0; i < 20; ++i)
+		for (size_t i = 0; i < numberOfBalls; ++i)
 		{
+			if (!worldLimits.contains(ballArray[i].getPosition()))
+				ballArray[i].resetToPosition(ballSpawn);
+
 			ballArray[i].update(dt);
 		}
 		particleSystemL.update(dt);
@@ -370,7 +386,7 @@ void Particle2D::Run()
 		debugRect.setRotation(vectorMath::angleD(testBall.getVelocity()));
 		m_window->draw(debugRect);
 		m_window->draw(testBall);
-		for (size_t i = 0; i < 20; ++i)
+		for (size_t i = 0; i < numberOfBalls; ++i)
 		{
 			m_window->draw(ballArray[i]);
 		}
@@ -400,6 +416,8 @@ void Particle2D::Run()
 		if (dt > 0.16f)
 			dt = 0.16f;
 	}
+
+	delete[] ballArray;
 }
 
 void Particle2D::setDebugMode(bool d)
