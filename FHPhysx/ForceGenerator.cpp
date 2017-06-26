@@ -142,7 +142,7 @@ void ForceGenerator::update(float dt)
 		if (collision != -1)
 		{
 			sf::ConvexShape& collider = *(m_collider[collision]);
-			collider.setFillColor(sf::Color::Red);
+			//collider.setFillColor(sf::Color::Red);
 			sf::Vector2f colliderPos = collider.getPosition();
 			float colliderRot = collider.getRotation();
 			sf::Vector2fLines l1(m_physBalls[i]->getPosition(), m_physBalls[i]->getPosition() + m_physBalls[i]->getVelocity()),

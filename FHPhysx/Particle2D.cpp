@@ -61,6 +61,15 @@ void Particle2D::Run()
 	testBall.setPosition(420.f, 100.f);
 	testBall.setOrigin(sf::Vector2f(radius, radius));
 
+	PhysBall* ballArray = new PhysBall[20];
+	for (size_t i = 0; i < 20; ++i)
+	{
+		ballArray[i].setFillColor(COLOR_0);
+		ballArray[i].setRadius(radius);
+		ballArray[i].setPosition(500.f, -float(i) * 30.f);
+		ballArray[i].setOrigin(sf::Vector2f(radius, radius));
+	}
+
 	PhysBall staticBall;
 	staticBall.setFillColor(COLOR_0);
 	staticBall.setRadius(radius);
@@ -70,6 +79,7 @@ void Particle2D::Run()
 	//Level
 	size_t objectsInLevel = 5;
 	sf::ConvexShape levelObjects[5];
+	//sf::ConvexShape* levelObjects = new sf::ConvexShape[objectsInLevel];
 	//levelObjects[0] = sf::ConvexShape();
 
 	//floor
@@ -128,6 +138,11 @@ void Particle2D::Run()
 	forceGen.addForce(&fanForce);
 	forceGen.addPhysBall(&testBall);
 	forceGen.addPhysBall(&staticBall);
+	for (size_t i = 0; i < 20; ++i)
+	{
+		forceGen.addPhysBall(&(ballArray[i]));
+	}
+
 
 	for(size_t i = 0; i < objectsInLevel; ++i)
 		forceGen.addCollider(&levelObjects[i]);
@@ -153,7 +168,7 @@ void Particle2D::Run()
 	particleSystemR.setActive(false);
 	particleSystemR.setRotationMode(ParticleSystem::ROTATION_LEFT);
 
-	PhysNet* net = new PhysNet(20, 10, 5.f, 2.f, &forceGen);
+	PhysNet* net = new PhysNet(50, 10, 5.f, 2.f, &forceGen);
 	net->setPosition(sf::Vector2f(200.f, 20.f));
 	//net->setRotation(-45.f);
 	net->setStiffness(0.1f);
@@ -293,10 +308,15 @@ void Particle2D::Run()
 
 		//testBall.addImpulse(gravity * dt);
 		//physFloor.setFillColor(COLOR_1);
-		for (size_t i = 0; i < objectsInLevel; ++i)
-			levelObjects[i].setFillColor(COLOR_1);
+
+		/*for (size_t i = 0; i < objectsInLevel; ++i)
+			levelObjects[i].setFillColor(COLOR_1);*/
 		forceGen.update(dt);
 		testBall.update(dt);
+		for (size_t i = 0; i < 20; ++i)
+		{
+			ballArray[i].update(dt);
+		}
 		particleSystemL.update(dt);
 		particleSystemR.update(dt);
 		net->update(dt);
@@ -350,6 +370,10 @@ void Particle2D::Run()
 		debugRect.setRotation(vectorMath::angleD(testBall.getVelocity()));
 		m_window->draw(debugRect);
 		m_window->draw(testBall);
+		for (size_t i = 0; i < 20; ++i)
+		{
+			m_window->draw(ballArray[i]);
+		}
 		m_window->draw(staticBall);
 
 		//ui stuff
