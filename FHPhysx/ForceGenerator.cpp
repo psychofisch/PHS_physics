@@ -108,8 +108,34 @@ void ForceGenerator::update(float dt)
 		{
 			if (m_physBalls[i]->getGlobalBounds().intersects(m_collider[c]->getGlobalBounds()))
 			{
-				collision = c;
-				break;
+				sf::ConvexShape& collider = *m_collider[c];
+				sf::Vector2f colliderPos = m_collider[c]->getPosition();
+				float colliderRot = m_collider[c]->getRotation();
+
+				size_t signCount = 0;
+				for (int p = 0; p < collider.getPointCount(); ++p)
+				{
+					sf::Vector2f p1 = colliderPos + vectorMath::rotateD(collider.getPoint(p), colliderRot),
+						p2;
+
+					if (p < collider.getPointCount() - 1)
+						p2 = colliderPos + vectorMath::rotateD(collider.getPoint(p + 1), colliderRot);
+					else
+						p2 = colliderPos + vectorMath::rotateD(collider.getPoint(0), colliderRot);
+
+					float sign = vectorMath::sign(m_physBalls[i]->getPosition(), p1, p2);
+
+					if (sign > 0.f)
+					{
+						++signCount;
+					}
+				}
+
+				if (signCount == collider.getPointCount())
+				{
+					collision = c;
+					break;
+				}
 			}
 		}
 
@@ -150,7 +176,7 @@ void ForceGenerator::update(float dt)
 				else
 					m_physBalls[i]->mode = PhysBall::MODE_FREEFALL;
 
-				sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), -90.f);
+				sf::Vector2f normal = vectorMath::rotateD(vectorMath::normalize(intersection - (colliderPos + vectorMath::rotateD(collider.getPoint(collisionIndex), colliderRot))), 90.f);
 
 				sf::Vector2f reflection = -m_physBalls[i]->getVelocity() + m_physBalls[i]->getVelocity() - (1.f + m_physBalls[i]->bounciness) * vectorMath::dot(m_physBalls[i]->getVelocity(), normal) * normal;
 				reflection /= dt;

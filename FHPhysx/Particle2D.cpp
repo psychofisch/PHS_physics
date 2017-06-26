@@ -1,7 +1,5 @@
 #include "Particle2D.h"
 
-
-
 Particle2D::Particle2D()
 {
 }
@@ -71,7 +69,8 @@ void Particle2D::Run()
 
 	//Level
 	size_t objectsInLevel = 5;
-	sf::ConvexShape* levelObjects = new sf::ConvexShape[objectsInLevel];
+	sf::ConvexShape levelObjects[5];
+	//levelObjects[0] = sf::ConvexShape();
 
 	//floor
 	levelObjects[0].setFillColor(COLOR_1);
@@ -154,7 +153,7 @@ void Particle2D::Run()
 	particleSystemR.setActive(false);
 	particleSystemR.setRotationMode(ParticleSystem::ROTATION_LEFT);
 
-	PhysNet* net = new PhysNet(10, 10, 20.f, 10.f, &forceGen);
+	PhysNet* net = new PhysNet(20, 10, 5.f, 2.f, &forceGen);
 	net->setPosition(sf::Vector2f(200.f, 20.f));
 	//net->setRotation(-45.f);
 	net->setStiffness(0.1f);
