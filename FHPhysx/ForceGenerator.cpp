@@ -99,7 +99,7 @@ void ForceGenerator::update(float dt)
 
 				//if (vectorMath::dot(m_physBalls[i]->getVelocity(), m_physBalls[b]->getVelocity()) > 0.f)
 				//{
-				//	force += vectorMath::magnitude(m_physBalls[b]->getVelocity()) * -normal / dt;
+				//	force += vectorMath::magnitude(m_physBalls[b]->getVelocity()) * normal;
 				//	//m_physBalls[i]->setPosition(m_physBalls[i]->getPosition() - normal * (m_physBalls[i]->getRadius() + m_physBalls[b]->getRadius())); //TODO: with forces
 				//}
 				//else
@@ -198,7 +198,7 @@ void ForceGenerator::update(float dt)
 
 				force += 25.f * normal;
 
-				sf::Vector2f friction = m_physBalls[i]->getVelocity() * 0.1f / dt;
+				sf::Vector2f friction = m_physBalls[i]->getVelocity() * .1f / dt;
 				force -= friction;
 				
 				//m_physBalls[i]->setPosition(intersection + vectorMath::normalize(normal) * m_physBalls[i]->getRadius());//TODO: with forces

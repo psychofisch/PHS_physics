@@ -69,21 +69,15 @@ void Particle2D::Run()
 	testBall.setOrigin(sf::Vector2f(radius, radius));
 
 	sf::Vector2f ballSpawn(1280.f * 0.5f, 10.f);
-	size_t numberOfBalls = 20;
+	size_t numberOfBalls = 50;
 	PhysBall* ballArray = new PhysBall[numberOfBalls];
 	for (size_t i = 0; i < numberOfBalls; ++i)
 	{
 		ballArray[i].setFillColor(COLOR_0);
 		ballArray[i].setRadius(radius);
-		ballArray[i].setPosition(ballSpawn - sf::Vector2f((float(rand()) / RAND_MAX - 0.5f) * 50.f, float(i) * 30.f));
+		ballArray[i].setPosition(ballSpawn - sf::Vector2f((float(rand()) / RAND_MAX - 0.5f) * 50.f, float(i) * 50.f));
 		ballArray[i].setOrigin(sf::Vector2f(radius, radius));
 	}
-
-	PhysBall staticBall;
-	staticBall.setFillColor(COLOR_0);
-	staticBall.setRadius(radius);
-	staticBall.setPosition(518.f, 400.f);
-	staticBall.setOrigin(sf::Vector2f(radius, radius));
 
 	//Level
 	size_t objectsInLevel = 5;
@@ -146,7 +140,6 @@ void Particle2D::Run()
 	forceGen.addForce(&gravity);
 	forceGen.addForce(&fanForce);
 	forceGen.addPhysBall(&testBall);
-	forceGen.addPhysBall(&staticBall);
 	for (size_t i = 0; i < numberOfBalls; ++i)
 	{
 		forceGen.addPhysBall(&(ballArray[i]));
@@ -162,7 +155,7 @@ void Particle2D::Run()
 	particleA.setOrigin(1.f, 2.f);
 
 	ParticleSystem particleSystemL(1000, &forceGen);
-	particleSystemL.setPosition(sf::Vector2f(99.f, 77.f));
+	particleSystemL.setPosition(sf::Vector2f(150.f, 77.f));
 	particleSystemL.setParticleShape(&particleA);
 	particleSystemL.setActive(false);
 
@@ -177,7 +170,7 @@ void Particle2D::Run()
 	particleSystemR.setActive(false);
 	particleSystemR.setRotationMode(ParticleSystem::ROTATION_LEFT);
 
-	PhysNet* net = new PhysNet(50, 10, 5.f, 2.f, &forceGen);
+	PhysNet* net = new PhysNet(20, 10, 10.f, 2.f, &forceGen);
 	net->setPosition(sf::Vector2f(200.f, 20.f));
 	//net->setRotation(-45.f);
 	net->setStiffness(0.1f);
@@ -328,7 +321,7 @@ void Particle2D::Run()
 			levelObjects[i].setFillColor(COLOR_1);*/
 		if (true || timeSinceLastPhysxUpdate >= physTick)
 		{
-			//timeSinceLastPhysxUpdate *= 0.1f;
+			//timeSinceLastPhysxUpdate *= 0.01f;
 			forceGen.update(timeSinceLastPhysxUpdate);
 			testBall.update(timeSinceLastPhysxUpdate);
 			for (size_t i = 0; i < numberOfBalls; ++i)
@@ -398,7 +391,6 @@ void Particle2D::Run()
 		{
 			m_window->draw(ballArray[i]);
 		}
-		m_window->draw(staticBall);
 
 		//ui stuff
 		m_window->setView(m_uiView);
