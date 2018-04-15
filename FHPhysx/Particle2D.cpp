@@ -80,6 +80,7 @@ void Particle2D::Run()
 	}
 
 	//Level
+	//-> hardcoded mess but nothing more was needed
 	size_t objectsInLevel = 5;
 	sf::ConvexShape levelObjects[5];
 	//sf::ConvexShape* levelObjects = new sf::ConvexShape[objectsInLevel];

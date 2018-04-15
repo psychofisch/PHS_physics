@@ -5,7 +5,6 @@
 PhysBall::PhysBall()
 	:m_velocity(0.f, 0.f),
 	//mass(1.0f),
-	mode(MODE_FREEFALL),
 	bounciness(.5f)
 {
 	sf::CircleShape::setPointCount(16);
