@@ -12,5 +12,4 @@ gap <float>		- size of the gap between the triangles
 
 Author
 -----
-Thomas Fischer
-gs16m022
+psychofish
